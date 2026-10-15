@@ -26,8 +26,12 @@ Look before concluding. Typical sources:
 - Test setup: what exists, at which levels, how it runs, mutation testing.
 - CI workflows, and whether failures block a merge (branch protection or
   rulesets, through the platform's CLI or API when available).
+- How features are specified before being built: issues, specs, the output of
+  a planning workflow. Read a few recent ones.
 - How the agent reaches data, documentation and running environments.
 - Where the project keeps decisions, history and incident reports.
+- Recent pull requests and issues: bugs caught by a human reviewer rather than
+  by a test point to a missing test layer.
 
 Prefer commands that read: the latest CI runs rather than running the full
 suite locally. Cite every finding with its source (file and line, command and
@@ -38,6 +42,21 @@ output). Separate what was observed from what is inferred.
 For each principle: respected, partial, missing, or not applicable, with the
 evidence. "Not applicable" is a valid answer when the project's stakes do not
 justify the principle; say why.
+
+Two principles cannot be judged from an inventory, and need a closer look:
+
+- **The plan.** Take the specifications of a few recent features and ask
+  whether a test author could derive the tests from them without guessing:
+  are the behaviours, edge cases and refusals written down, or only the
+  intent?
+- **The tests.** Counting tests or reading their names says little. Pick two
+  or three modules that carry real business logic, list the behaviours the
+  code implements (refusals, boundaries, rounding, error paths included), and
+  map each to the test that covers it, or to none. For a few precise lines (a
+  comparison operator, a boundary, a sign), ask whether a test would fail if
+  the line were mutated; say it is reasoning unless a mutation run backs it.
+  Check that each boundary is tested on both sides, and that the test layers
+  match where the bugs actually come from.
 
 Look for violations as carefully as for good practice. A harness that looks
 complete often hides a guard that never fires, an instruction file that
