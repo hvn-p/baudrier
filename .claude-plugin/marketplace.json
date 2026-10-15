@@ -1,0 +1,14 @@
+{
+  "name": "baudrier",
+  "description": "Judgment-level principles for building and reviewing the harness around an AI coding agent",
+  "owner": {
+    "name": "hvn-p"
+  },
+  "plugins": [
+    {
+      "name": "baudrier",
+      "source": "./plugins/baudrier",
+      "description": "What a good harness for an AI coding agent is, to build one on a new project or review one on an existing project."
+    }
+  ]
+}
