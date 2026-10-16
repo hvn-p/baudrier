@@ -56,6 +56,14 @@ harness makes the sources reachable.
 running environment; instructions that let the agent pick versions or APIs
 from memory.
 
+**Know the infrastructure.** Where the code runs, which environments exist and
+what serves what, how a change reaches production, which services it depends
+on and their limits. The agent cannot build something sound without knowing
+what it runs on, and it reads that state from the real system rather than
+from the code, which shows intent where the infrastructure shows reality.
+*Missing when*: no description of the environments and the deployment path;
+no read access to the infrastructure's state (status, logs, configuration).
+
 **Know the project's security stakes.** Who can reach the project, who may
 see or change what, which data is sensitive. An agent that does not know a
 service is exposed, or that each user must only see their own data, writes code

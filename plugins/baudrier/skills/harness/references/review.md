@@ -2,7 +2,8 @@
 
 The review compares a project's harness with the principles in
 [../SKILL.md](../SKILL.md) and returns recommendations backed by evidence. It
-changes nothing in the project.
+changes nothing in the project: a measurement that needs tools installed runs
+in a temporary clone of the repository.
 
 Run it from a fresh context. The agent that built or last changed the harness
 is the worst placed to review it.
@@ -29,6 +30,8 @@ Look before concluding. Typical sources:
 - How features are specified before being built: issues, specs, the output of
   a planning workflow. Read a few recent ones.
 - How the agent reaches data, documentation and running environments.
+- What the agent can know of the infrastructure: environments, deployment
+  path, services the project depends on, and read access to their state.
 - What the project states about security (exposure, who may access what,
   sensitive data), and about volumes and running costs. Silence on these, for
   a project whose stakes call for them, is a finding.
@@ -54,7 +57,8 @@ Two principles cannot be judged from an inventory, and need a closer look:
   intent?
 - **The tests.** Measure before judging, then judge what the measures cannot
   see.
-  1. Run the deterministic tools, or read their results in CI. Branch
+  1. Run the deterministic tools in a temporary clone, or read their results
+     in CI. Branch
      coverage first: line coverage overstates, since a line can count as
      covered while the error path on it never runs. A test lint if the
      ecosystem has one (tests without assertions, conditional assertions).
@@ -81,23 +85,28 @@ contradicts the code, or a rule that exists only in prose.
 
 ## 4. Recommend
 
+Group findings by principle. Several findings are often symptoms of one weak
+principle (a flaky test, a shared test database and an untested interface all
+say the tests do not protect enough), and ranking them one by one buries the
+cause. Each principle in default gets one verdict in a line, its findings as
+evidence, then its recommendations.
+
 Each recommendation states:
 
-- the principle concerned;
-- the observation, with its evidence;
 - the proposed change, adapted to the project's existing tools and workflows;
 - its level: something that breaks, something that informs, or a written rule
   (prefer them in that order);
 - its scope: project, machine, or platform settings.
 
-Order recommendations by impact. They are proposals: the project decides what
-its stakes justify. When a judgement depends on context the review cannot see
-(intent behind a choice, a business constraint), ask instead of concluding.
+Order the principles by impact. Recommendations are proposals: the project
+decides what its stakes justify. When a judgement depends on context the
+review cannot see (intent behind a choice, a business constraint), ask instead
+of concluding.
 
 ## 5. Report
 
-1. One paragraph: the overall state of the harness and the two or three
-   changes that matter most.
-2. The table of principles with status and evidence.
-3. The recommendations, in order.
+1. One paragraph: the overall state of the harness and what matters most.
+2. The principles in default, worst first: verdict, findings with evidence,
+   recommendations.
+3. The principles respected, one line each.
 4. What could not be observed, and the questions for the team.
