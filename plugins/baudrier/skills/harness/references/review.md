@@ -29,6 +29,9 @@ Look before concluding. Typical sources:
 - How features are specified before being built: issues, specs, the output of
   a planning workflow. Read a few recent ones.
 - How the agent reaches data, documentation and running environments.
+- What the project states about security (exposure, who may access what,
+  sensitive data), and about volumes and running costs. Silence on these, for
+  a project whose stakes call for them, is a finding.
 - Where the project keeps decisions, history and incident reports.
 - Recent pull requests and issues: bugs caught by a human reviewer rather than
   by a test point to a missing test layer.
@@ -49,14 +52,28 @@ Two principles cannot be judged from an inventory, and need a closer look:
   whether a test author could derive the tests from them without guessing:
   are the behaviours, edge cases and refusals written down, or only the
   intent?
-- **The tests.** Counting tests or reading their names says little. Pick two
-  or three modules that carry real business logic, list the behaviours the
-  code implements (refusals, boundaries, rounding, error paths included), and
-  map each to the test that covers it, or to none. For a few precise lines (a
-  comparison operator, a boundary, a sign), ask whether a test would fail if
-  the line were mutated; say it is reasoning unless a mutation run backs it.
-  Check that each boundary is tested on both sides, and that the test layers
-  match where the bugs actually come from.
+- **The tests.** Measure before judging, then judge what the measures cannot
+  see.
+  1. Run the deterministic tools, or read their results in CI. Branch
+     coverage first: line coverage overstates, since a line can count as
+     covered while the error path on it never runs. A test lint if the
+     ecosystem has one (tests without assertions, conditional assertions).
+     Mutation testing on two or three modules that carry real business logic,
+     scoped to those files and their tests, incremental when the tool allows
+     it. A scoped run takes seconds for a pure module and a few minutes for one
+     that hits a database; the whole project belongs to a scheduled CI job, not
+     to a review. Never run tests against a database that other work depends
+     on.
+  2. Read surviving mutants as questions ("is this boundary tested on both
+     sides?"), after dropping the noise: mutants on error message strings when
+     tests assert error codes, and equivalent mutants.
+  3. Then judge what no tool sees: behaviours the plan expects and the code
+     does not implement, edge cases nobody thought of, missing layers (an
+     interface with no test, flows across components). Check that the test
+     layers match where the bugs actually come from.
+  If the project has none of these tools, their absence is a recommendation,
+  and the review falls back to reasoning about mutations on a few lines,
+  saying it is reasoning.
 
 Look for violations as carefully as for good practice. A harness that looks
 complete often hides a guard that never fires, an instruction file that

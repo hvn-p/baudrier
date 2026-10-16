@@ -35,8 +35,6 @@ Three rules apply to every recommendation:
 - **Frame a cooperative agent, do not fight an adversary.** An agent follows
   its instructions. A check that detects drift, plus a review, is enough to
   catch it. Closing every imaginable bypass costs more than it protects.
-  Defending against a malicious actor is a security question, not a harness
-  one.
 
 A harness has two scopes: the machine (global instructions, credentials,
 global hooks) and the project (repository, CI, platform settings). Recommend
@@ -57,6 +55,27 @@ harness makes the sources reachable.
 *Missing when*: no documented way to reach a database, a dataset, logs or a
 running environment; instructions that let the agent pick versions or APIs
 from memory.
+
+**Know the project's security stakes.** Who can reach the project, who may
+see or change what, which data is sensitive. An agent that does not know a
+service is exposed, or that each user must only see their own data, writes code
+that works and leaks. The depth depends on the stakes: a local tool needs a
+line, an exposed service needs explicit rules. Where a rule can be checked by
+a program (dependency audit, security lint, a test that one user cannot read
+another's data, a check that every entry point requires authentication), it
+is.
+*Missing when*: nothing states who may access what, on a project that is
+exposed or holds other people's data; access rules enforced only by
+discipline.
+
+**Know the project's volumes and costs.** What volumes the project handles
+today and tomorrow, what a request, a query or a model call costs, what the
+budget is. Without it, the agent picks what works on a sample and fails at
+scale or on the invoice. A personal tool needs a line, a service at scale
+needs explicit figures. Where a limit can be checked by a program (a
+performance budget in CI, a query count in a test), it is.
+*Missing when*: nothing mentions volumes or costs, on a project that runs at
+scale or pays per use.
 
 ### What a machine judges
 
@@ -97,8 +116,9 @@ recommendation is to adopt one.
 
 **Tests that matter.** Not a coverage percentage, which rewards testing what is
 useless. Every piece of logic, every behaviour, every case including edge
-cases has a test that would fail if it broke. Mutation testing checks it: a
-test that survives a mutation of the code tests nothing. Tests go beyond the
+cases has a test that would fail if it broke. Tools measure it before anyone
+judges it: coverage shows what is surely untested, mutation testing shows
+what is executed but checked by nothing. Tests go beyond the
 code's logic: integration and end-to-end belong to the strategy. Knowing what
 to test is a skill of its own.
 *Missing when*: tests assert little or nothing, only unit tests exist for a

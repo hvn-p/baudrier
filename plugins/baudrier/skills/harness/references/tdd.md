@@ -61,6 +61,10 @@ review catches it, which is one more reason the reviewer is not the developer.
 ## Test quality
 
 Mutation testing tells whether tests test anything: it changes the code and
-expects at least one test to fail. Use the tool that fits the language. It is
-expensive to run, since it reruns tests for each mutation: run it in CI, or
-locally on the changed code only.
+expects at least one test to fail. Use the tool that fits the language. Its
+cost grows with the code under mutation and with the tests each mutant
+reruns: scoped to the files a change touches, and incremental, it fits a
+local run or a review; across the whole project it belongs to a scheduled CI
+job. Coverage costs almost nothing and runs wherever the suite runs; prefer
+branch coverage, and read it as what is surely untested, never as what is
+tested.
