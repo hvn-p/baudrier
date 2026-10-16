@@ -1,7 +1,7 @@
 {
   "name": "baudrier",
-  "version": "0.4.0",
-  "description": "What a good harness for an AI coding agent is, to build one on a new project or review one on an existing project.",
+  "version": "0.5.0",
+  "description": "Principles of a good harness for a coding agent, a reviewer for existing harnesses, and a test-first workflow with separated roles.",
   "author": {
     "name": "hvn-p"
   },

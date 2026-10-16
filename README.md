@@ -1,31 +1,34 @@
 # baudrier
 
-Principles for the harness around an AI coding agent (instruction files,
-skills, agents, hooks, tests, CI, access to data): what to set up on a project,
-and how to review what is already there.
+A Claude Code plugin for the harness around a coding agent (instruction files,
+skills, agents, hooks, tests, CI, access to data): what to set up on a
+project, how to review what is already there, and a test-first workflow with
+separated roles.
 
-- **`harness` skill**: the principles, and the signs that show when one is
-  missing.
+- **`harness` skill**: the principles of a good harness, and the signs that
+  show when one is missing.
 - **`harness-reviewer` agent**: reviews a project's harness from a fresh
   context and returns recommendations backed by evidence. Read-only.
+- **`test-first` skill**: tests written from the plan before the code, by an
+  agent that does not write the code, with a guard script that detects any
+  later change to a test and requires a reason per file. It runs the
+  `test-writer`, `test-reviewer`, `implementer` and `code-reviewer` agents.
 
 ## Install
-
-In Claude Code, then restart the session:
 
 ```
 /plugin marketplace add hvn-p/baudrier
 /plugin install baudrier@baudrier
 ```
 
-The skill follows the open [Agent Skills](https://agentskills.io) format: with
-another agent, copy `plugins/baudrier/skills/harness/` into its skills
-directory.
+Then restart the session.
 
 ## Use
 
-To review a harness in Claude Code, mention `@agent-baudrier:harness-reviewer`,
-or run `claude --agent baudrier:harness-reviewer` from the project's directory.
+- Review a harness: mention `@agent-baudrier:harness-reviewer`, or run
+  `claude --agent baudrier:harness-reviewer` from the project's directory.
+- Develop with test-first: ask for it by name; to set the guard up in a
+  project, ask to "set up test-first".
 
 ## License
 

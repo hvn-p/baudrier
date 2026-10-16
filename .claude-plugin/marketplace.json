@@ -8,7 +8,7 @@
     {
       "name": "baudrier",
       "source": "./plugins/baudrier",
-      "description": "What a good harness for an AI coding agent is, to build one on a new project or review one on an existing project."
+      "description": "Principles of a good harness for a coding agent, a reviewer for existing harnesses, and a test-first workflow with separated roles."
     }
   ]
 }

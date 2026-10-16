@@ -16,8 +16,8 @@ documentation, which changes faster than these principles.
 - **Building or evolving a harness**: when a project starts, when a new rule
   appears in the code, after an agent mistake. Compare what the project has
   with the principles below and propose what is missing.
-- **Reviewing a harness**: follow [references/review.md](references/review.md),
-  in a fresh context. Whoever built the harness does not review it.
+- **Reviewing a harness**: hand it to the `harness-reviewer` agent, which
+  starts from a fresh context. Whoever built the harness does not review it.
 
 Everything here is a recommendation. A project takes what its stakes justify:
 a throwaway prototype needs little, a shared production codebase needs most.
@@ -136,8 +136,8 @@ catch a regression.
 **Tests first, reviewed, then protected.** One agent writes the tests from the
 plan, they are reviewed from a fresh context, then another agent writes the
 code. Modifying a test is not prevented but detected, and each modified test
-needs its own reason, judged by a reviewer. See
-[references/tdd.md](references/tdd.md).
+needs its own reason, judged by a reviewer. The `test-first` skill runs this
+workflow.
 
 **One role per agent.** Agents grade their own work too favourably. The agent
 that produces does not verify.
