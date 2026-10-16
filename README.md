@@ -12,7 +12,7 @@ separated roles.
 - **`test-first` skill**: tests written from the plan before the code, by an
   agent that does not write the code, with a guard script that detects any
   later change to a test and requires a reason per file. It runs the
-  `test-writer`, `test-reviewer`, `implementer` and `code-reviewer` agents.
+  `test-writer`, `test-reviewer`, `implementer` and `test-auditor` agents.
 
 ## Install
 

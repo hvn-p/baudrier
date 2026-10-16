@@ -19,7 +19,7 @@ agent for that role and passes on what the next one needs.
 | Write the tests | `test-writer` | Tests only |
 | Review the tests | `test-reviewer` | Nothing |
 | Write the code | `implementer` | Code; a test only with a reason |
-| Review the code | `code-reviewer` | Nothing |
+| Audit the tests and the plan | `test-auditor` | Nothing |
 
 ## Before starting: the plan
 
@@ -77,32 +77,35 @@ owns the plan can confirm or reverse them.
    decision is needed): decide it as an open point, update the plan, and go
    back to the step it affects, the tests first if the expected behaviour
    changes.
-5. **Code review.** Push the branch first, so that CI runs the tests and the
-   mutation testing on the changed files. Give `code-reviewer` the plan and the
-   implementer's report. It reruns the guard, judges each reason, looks for
-   code that games the tests, and measures what tools can measure. It accepts,
-   returns findings (each follows its path, below), or flags reasons it
-   disputes. Surviving mutants go back to `test-writer` for the missing tests,
-   then through a new review and snapshot; one that reveals a behaviour nobody
-   decided is an open point first.
+5. **Audit and review.** Push the branch first, so that CI runs the tests and
+   the mutation testing on the changed files. Give `test-auditor` the plan and
+   the implementer's report. It reruns the guard, judges each reason, looks for
+   code that games the tests, checks every item of the plan is implemented, and
+   measures the tests. Surviving mutants go back to `test-writer` for the
+   missing tests, then through a new review and snapshot; one that reveals a
+   behaviour nobody decided is an open point first. The code itself is
+   reviewed the way the project already reviews code. Each finding follows its
+   path, below.
 6. **Disputed reasons go to a human**, with the reason and the reviewer's
    objection side by side.
 
 ### When a review finds something
 
-Whatever the source (the code review, another review tool, a human), each
+Whatever the source (the audit, the code review, another review tool, a
+human), each
 finding takes one of three paths, and only that loop runs again:
 
 | Finding | Path |
 |---|---|
-| A bug: the code does not do what the plan says | A test was missing. `test-writer` adds a test that reproduces it and fails, `test-reviewer` reviews it, new snapshot, `implementer` fixes, code review |
-| A quality issue with no change in behaviour | No test changes: `implementer` fixes, runs `check`, code review |
+| A bug: the code does not do what the plan says | A test was missing. `test-writer` adds a test that reproduces it and fails, `test-reviewer` reviews it, new snapshot, `implementer` fixes, audit and review |
+| A quality issue with no change in behaviour | No test changes: `implementer` fixes, runs `check`, audit and review |
 | The plan was wrong or incomplete | An open point: decide it, update the plan and its examples, then back to the tests |
 
-Done means: the tests pass, the guard's check passes, the code review accepts,
-and the final report lists every decision taken on the way. The guard's table, if any test changed, goes where the project keeps
-such content (the pull request description, for example). It never stays as a
-file in the repository.
+Done means: the tests pass, the guard's check passes, the audit and the code
+review accept, and the final report lists every decision taken on the way. The
+guard's table, if any test changed, goes where the project keeps such content
+(the pull request description, for example). It never stays as a file in the
+repository.
 
 ## The test guard
 
@@ -134,10 +137,10 @@ without dependencies.
    `check` before declaring it is done.
 5. Add a CI job that runs mutation testing on the files a pull request
    changes, with the language's mutation tool. It is too heavy to run on a
-   shared machine, and the code review reads its result.
+   shared machine, and the test audit reads its result.
 
 ## Limits
 
 The guard does not see cheating in production code: neutralising an assertion
-library, special-casing the inputs the tests use. Only the code review catches
-it, which is one more reason the reviewer is not the implementer.
+library, special-casing the inputs the tests use. Only the test audit catches
+it, which is one more reason the auditor is not the implementer.
