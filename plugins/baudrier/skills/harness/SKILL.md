@@ -255,9 +255,11 @@ writing a user guide) becomes a skill.
 **Continuous improvement.** A harness is never finished; it evolves with the
 code. Every new rule that appears in the code calls for its check.
 
-**Every incident ends with a harness change.** The account of the incident is
-content and goes to its defined home. What matters is the answer to "what
-changes so this cannot happen again". In order of preference: something that
+**Every finding ends with a harness change, or a reason not to.** An incident,
+a review comment, a failed validation: each asks what in the harness would
+have prevented it. The account is content and goes to its defined home. What
+matters is the answer to "what changes so this cannot happen again", and
+"nothing" is a valid answer. In order of preference: something that
 breaks, something that informs automatically, a written rule.
 
 **Prune.** Each component compensates for something the model cannot do. When

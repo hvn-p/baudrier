@@ -12,3 +12,6 @@
   [0001](docs/decisions/0001-knowledge-and-modules.md).
 - Plans and designs live in GitHub issues; a change of direction gets an
   ADR in `docs/decisions/`.
+- After each finding (a review, a validation, a human report), ask what in
+  the harness would have prevented it: add a check first; otherwise a rule
+  in the AGENTS.md closest to the code concerned; otherwise nothing.
