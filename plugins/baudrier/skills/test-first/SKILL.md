@@ -114,9 +114,9 @@ path. Detecting changes and requiring a reason covers the same cases with a
 small script: [`scripts/guard-tests.mjs`](scripts/guard-tests.mjs), in Node,
 without dependencies.
 
-- `snapshot` records a fingerprint of every protected file (tests and their
-  configuration), inside the git directory: never versioned, separate for each
-  worktree, independent of any commit.
+- `snapshot` records a fingerprint of every protected file (tests, their
+  configuration, and the guard script itself), inside the git directory: never
+  versioned, separate for each worktree, independent of any commit.
 - `check` fails on any modified, added or removed protected file without its
   own reason, and names the two ways out: undo the change, or rerun with
   `--reason <file>="<why>"`, one per file. Once each change has a reason, it

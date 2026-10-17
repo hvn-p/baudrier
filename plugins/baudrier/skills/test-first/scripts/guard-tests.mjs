@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// baudrier guard-tests, version 1.
+// baudrier guard-tests, version 2.
 //
 // Detects changes to test files made after a snapshot, and requires one reason
-// per changed file. It serves the test-first skill of the baudrier plugin.
+// per changed file. The script protects itself the same way. It serves the
+// test-first skill of the baudrier plugin.
 //
 // This is a reference script: copy it into the project, then adapt the parts
 // marked ADAPT. Keep the version line above so a review can tell how far a
@@ -15,7 +16,7 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // ADAPT: what counts as a protected file in this project, as a path relative
@@ -51,11 +52,19 @@ function git(cwd, ...args) {
   }
 }
 
+// This script's path relative to the repository root, so that changing the
+// guard itself counts as a protected change.
+function self(root) {
+  const path = relative(realpathSync(root), realpathSync(fileURLToPath(import.meta.url)));
+  return path.split(sep).join('/');
+}
+
 function fingerprints(cwd) {
   const root = git(cwd, 'rev-parse', '--show-toplevel');
+  const script = self(root);
   const files = git(cwd, 'ls-files', '--cached', '--others', '--exclude-standard')
     .split('\n')
-    .filter((file) => file && isProtected(file));
+    .filter((file) => file && (isProtected(file) || file === script));
   const result = {};
   for (const file of files) {
     const path = join(root, file);
@@ -95,12 +104,26 @@ function snapshot(cwd) {
   return 'guard-tests: snapshot taken.\n';
 }
 
+function readSnapshot(path) {
+  try {
+    const data = JSON.parse(readFileSync(path, 'utf8'));
+    if (typeof data === 'object' && data !== null) return data;
+  } catch {
+    // Unreadable or not JSON: reported below, like any other corruption.
+  }
+  throw new Failure(
+    2,
+    `the snapshot is corrupted (${path}).\n` +
+      'Take a new one only once the tests are back to their reviewed state.',
+  );
+}
+
 function check(cwd, args) {
   const reasons = parseReasons(args);
   if (!existsSync(snapshotPath(cwd))) {
     throw new Failure(2, 'no snapshot. Take one with `snapshot` before development starts.');
   }
-  const before = JSON.parse(readFileSync(snapshotPath(cwd), 'utf8'));
+  const before = readSnapshot(snapshotPath(cwd));
   const found = changes(before, fingerprints(cwd));
   const changed = new Set(found.map((c) => c.file));
 
