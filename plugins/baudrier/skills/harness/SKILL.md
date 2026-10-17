@@ -18,6 +18,9 @@ documentation, which changes faster than these principles.
   with the principles below and propose what is missing.
 - **Reviewing a harness**: hand it to the `harness-reviewer` agent, which
   starts from a fresh context. Whoever built the harness does not review it.
+- **Installing what a project lacks**: the `harness-setup` skill installs
+  ready-made modules (the test-first workflow, the procedure and check for
+  instruction files) and adapts them to the project.
 
 Everything here is a recommendation. A project takes what its stakes justify:
 a throwaway prototype needs little, a shared production codebase needs most.
@@ -121,6 +124,21 @@ plan: if the test author has to guess, the plan is insufficient. This skill
 requires the plan, it does not provide the means: if the project has a
 planning workflow, the plan comes from there; if not, that is a gap, and the
 recommendation is to adopt one.
+*Missing when*: plans that state only the intent; tests that guess what the
+plan leaves open.
+
+**The plan is confirmed, and its open points decided, before any test.** A
+plan read as prose is often approved without being read. Its owner confirms
+it in the form that makes a gap obvious: concrete examples for logic (this
+input gives this result, this one is refused with this code), a mockup for an
+interface, where a missing field or action shows at once. Every open point is
+decided before the tests, since a test fixes the behaviour it expects. A human
+decides what has real consequences (money, data, security, a behaviour users
+or other systems rely on, anything hard to undo); the orchestrating session may
+decide a small point, writes it into the plan, and lists it in its report for
+the owner to confirm or reverse.
+*Missing when*: plans approved as prose only; decisions taken during the work
+that appear nowhere.
 
 **Tests that matter.** Not a coverage percentage, which rewards testing what is
 useless. Every piece of logic, every behaviour, every case including edge
@@ -136,11 +154,27 @@ catch a regression.
 **Tests first, reviewed, then protected.** One agent writes the tests from the
 plan, they are reviewed from a fresh context, then another agent writes the
 code. Modifying a test is not prevented but detected, and each modified test
-needs its own reason, judged by a reviewer. The `test-first` skill runs this
-workflow.
+needs its own reason, judged by a reviewer: blocking writes to tests is heavy
+and always bypassable by some forgotten path, while detection covers the same
+cases with a small script. Detection does not see production code that games
+the tests (a special case for the inputs they use, a neutralised assertion);
+an audit from a fresh context looks for it. The `test-first` module of
+`harness-setup` installs this workflow.
+*Missing when*: tests and code written in one pass by one agent; tests changed
+during development without a trace or a reason.
+
+**Each finding goes back to its cause.** Whatever its source (an audit, a code
+review, a human), a finding takes one of three paths, and only that loop runs
+again. A bug means a test was missing: a test that reproduces it comes first,
+reviewed like the others, then the fix. A quality issue changes the code and
+no test. A plan that was wrong or incomplete is an open point: decided, written
+into the plan, then the tests follow.
+*Missing when*: bugs fixed without a test that reproduces them; tests edited
+to fit a fix; a change of behaviour that reached the code but not the plan.
 
 **One role per agent.** Agents grade their own work too favourably. The agent
-that produces does not verify.
+that produces does not verify, and one that writes both the tests and the code
+adjusts one to the other.
 
 **Agents briefed for a need.** Investigation, test writing, test review,
 development: each with its own brief, launched when that need arises. Not one
@@ -166,11 +200,44 @@ hypothesis.
 ### What the agent reads
 
 **Instruction files hold instructions only.** `CLAUDE.md`, `AGENTS.md` and
-their equivalents carry rules, never history or session logs. They stay short
-and point to deeper documentation. The `editing-agents-md` skill covers how to
-write and amend them.
+their equivalents, at the root or nested, load into every session started in
+their directory and steer every task. They carry rules, never history or
+session logs, and say where the project keeps its history instead. Every path
+and command they cite exists. The `editing-agents-md` module of
+`harness-setup` installs the procedure and the check for amending them.
 *Missing when*: dated entries, "we did", "was removed", session summaries,
 facts that contradict the code (a framework version that moved on).
+
+**Every line earns its place.** The reader is the agent at the start of any
+task. A line stays if, without it, the agent would make a mistake, and it
+holds what the agent cannot discover: not the code, the configuration, the
+package scripts or the lint rules, but how to run one test, where the data
+lives, which environments exist. What one directory needs goes into a nested
+file there, what only some tasks need into a skill or a doc; the root file is
+a map to where the detail lives, within a size budget a check holds. Every
+addition answers a real need (an observed mistake, a new convention), never
+"just in case". Past the budget, the content belongs elsewhere, not in denser
+sentences.
+*Missing when*: a root file past its budget; lines that restate the code or
+the package scripts; sections only one kind of task needs.
+
+**Directives, not explanations.** A reason written inline narrows a directive
+to the cases that look like it, and a directive may have several reasons: the
+file links to where the reason lives (an ADR, a doc). "Never" is kept for
+safety, data loss or a mistake already observed; a broad prohibition steers
+away from the right call as often as from the wrong one. The file is written
+for the role, not the occasion: no account of the session that produced it,
+no named person or ticket unless that is the subject.
+*Missing when*: paragraphs of rationale; blanket "never" rules; a session, a
+person or a ticket named for no reason.
+
+**One owner per fact.** Each fact lives in one place among the instruction
+files, nested files, global configuration and skills; the others point to it
+or say nothing. Where a directory has both `CLAUDE.md` and `AGENTS.md`, one is
+a path to the other (a symlink, or a file whose only content imports the
+other), never two different files.
+*Missing when*: one rule worded differently in two files; a `CLAUDE.md` and an
+`AGENTS.md` side by side with different content.
 
 **Content has a defined home.** Everything not directly tied to the code
 (history, decisions, incident reports, meeting notes) goes where the project
