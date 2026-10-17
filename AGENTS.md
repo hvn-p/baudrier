@@ -6,6 +6,8 @@
   `.claude/baudrier.json` are this repository's adapted copies of its
   modules, not the plugin.
 - When a module artifact changes, raise its version mark.
+- Run the evals in `plugins/baudrier/evals/` on demand only, with
+  `claude plugin eval plugins/baudrier --scaffold --allow-tools Write Edit`.
 - Principles go in `plugins/baudrier/skills/harness/`; anything a project
   installs is a module in `plugins/baudrier/skills/harness-setup/modules/`
   with the shared layout. See
