@@ -161,6 +161,18 @@ something passes and the project has no AGENTS.md or CLAUDE.md, create
 AGENTS.md through that procedure, with a CLAUDE.md whose only content is
 `@AGENTS.md`. Run its check.
 
+Whatever modules were picked, the root instruction file carries these standing
+directives, adapted to the project's wording, unless it already says the same:
+
+```
+- After a finding that could recur beyond the current work (a review, a
+  validation, a human report), ask what in the harness would have prevented
+  it: a check first; otherwise a rule in the closest AGENTS.md; otherwise
+  nothing.
+- When a change removes the cause behind such a rule (a check now covers
+  it, the code changed), update or remove the rule.
+```
+
 ## Upgrade
 
 For each module of `.claude/baudrier.json` older than the plugin:
