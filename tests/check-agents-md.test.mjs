@@ -74,6 +74,7 @@ test('pair: two different CLAUDE.md and AGENTS.md in one directory fail', () => 
   const r = check(dir);
   assert.equal(r.code, 1);
   assert.match(r.err, /^CLAUDE\.md: pair: CLAUDE\.md and AGENTS\.md are two different files/m);
+  assert.match(r.err, /Make one a symlink to the other, or reduce one to an import/);
   rmSync(dir, { recursive: true });
 });
 
@@ -144,7 +145,7 @@ test('size: a root file of 150 lines passes, 151 fails with the count and the li
   dir = repo({ 'CLAUDE.md': lines(151) });
   const r = check(dir);
   assert.equal(r.code, 1);
-  assert.match(r.err, /^CLAUDE\.md: size: 151 lines \(limit 150\)/m);
+  assert.match(r.err, /^CLAUDE\.md: size: 151 lines \(limit 150\)\. Move what only some tasks need/m);
   rmSync(dir, { recursive: true });
 });
 
@@ -172,7 +173,7 @@ test('history: each default marker is reported with its line', () => {
   assert.equal(r.code, 1);
   HISTORY.forEach((_, i) => assert.match(r.err, new RegExp(`^AGENTS\\.md:${i + 1}: history: `, 'm')));
   assert.match(r.err, /"2026-10-17"/);
-  assert.match(r.err, /"was removed"/);
+  assert.match(r.err, /"was removed" is history\. Keep it where the project keeps history/);
   rmSync(dir, { recursive: true });
 });
 
@@ -192,6 +193,9 @@ test('history: pointers to history, inline code and code blocks are not history'
     'git log --since 2026-01-01  # previously used',
     '```',
     '- Release notes go to the changelog.',
+    '  ```',
+    '  as of 2026-01-01',
+    '  ```',
   ].join('\n');
   const dir = repo({ 'AGENTS.md': content + '\n' });
   const r = check(dir);
@@ -202,7 +206,17 @@ test('history: pointers to history, inline code and code blocks are not history'
 // References
 
 test('references: a cited path that does not exist fails, with line and path', () => {
-  for (const span of ['docs/missing.md', 'package.json', 'src/gone', './scripts/x.sh']) {
+  for (const span of [
+    'docs/missing.md',
+    'package.json',
+    'src/gone',
+    './scripts/x.sh',
+    './src/gone',
+    'ci.yaml',
+    'tool.mjs',
+    'App.tsx',
+    'lib.ts',
+  ]) {
     const dir = repo({ 'AGENTS.md': `- ok\n- See \`${span}\`.\n`, 'src/a.js': '' });
     const r = check(dir);
     assert.equal(r.code, 1, span);
@@ -213,7 +227,7 @@ test('references: a cited path that does not exist fails, with line and path', (
 
 test('references: existing paths pass, from the root or from the file directory', () => {
   const dir = repo({
-    'pkg/AGENTS.md': '- `index.js`, `scripts/run.sh`, `./index.js`, `src/`, `src/a.js:12`, `../package.json`\n',
+    'pkg/AGENTS.md': '- `index.js`, `scripts/run.sh`, `./index.js`, `src/`, `src/a.js:12`, `src/a.js:12:30`, `../package.json`\n',
     'pkg/index.js': '',
     'scripts/run.sh': '',
     'src/a.js': '',
@@ -238,8 +252,10 @@ test('references: URLs, globs, placeholders, commands and non-paths are ignored'
     'process.env',
     'origin/main',
     'v1.2',
+    'settings.json5',
   ];
-  const content = spans.map((s) => `- \`${s}\``).join('\n') + '\n```\n`missing/file.md`\n```\n';
+  const content =
+    spans.map((s) => `- \`${s}\``).join('\n') + '\n```\n`missing/file.md`\n```\n@docs/missing.md and more\n';
   const dir = repo({ 'AGENTS.md': content });
   const r = check(dir);
   assert.equal(r.code, 0, r.err);
@@ -260,6 +276,10 @@ test('references: an import line must resolve from the file directory', () => {
   let r = check(dir);
   assert.equal(r.code, 1);
   assert.match(r.err, /^CLAUDE\.md:1: reference: `AGENTS\.md` does not exist/m);
+  rmSync(dir, { recursive: true });
+  dir = repo({ 'CLAUDE.md': '- ok\n  @shared/rules\n' });
+  r = check(dir);
+  assert.match(r.err, /^CLAUDE\.md:2: reference: `shared\/rules` does not exist/m);
   rmSync(dir, { recursive: true });
   dir = repo({ 'pkg/CLAUDE.md': '@docs/rules.md\n', 'pkg/docs/rules.md': '- x\n' });
   r = check(dir);
@@ -319,7 +339,7 @@ test('amendment: a rule of 300 characters passes, 301 fails with its line', () =
   write(dir, 'AGENTS.md', BASE_FILE + item(301) + '\n');
   const r = check(dir, '--base', 'HEAD');
   assert.equal(r.code, 1);
-  assert.match(r.err, /^AGENTS\.md:17: amendment: this rule adds 301 characters \(limit 300\)/m);
+  assert.match(r.err, /^AGENTS\.md:17: amendment: this rule adds 301 characters \(limit 300\)\. Shorten it/m);
   rmSync(dir, { recursive: true });
 });
 
@@ -349,7 +369,7 @@ test('amendment: a block of 1500 characters passes, 1501 fails with its first li
   write(dir, 'AGENTS.md', BASE_FILE + '## New\n' + [item(300), item(300), item(300), item(300), item(296)].join('\n') + '\n');
   const r = check(dir, '--base', 'HEAD');
   assert.equal(r.code, 1);
-  assert.match(r.err, /^AGENTS\.md:17: amendment: this block adds 1502 characters \(limit 1500\)/m);
+  assert.match(r.err, /^AGENTS\.md:17: amendment: this block adds 1502 characters \(limit 1500\)\. Move what/m);
   rmSync(dir, { recursive: true });
 });
 
@@ -399,6 +419,67 @@ test('amendment: changes made on the base after the branch started do not count'
   rmSync(dir, { recursive: true });
 });
 
+test('amendment: rule boundaries follow markdown, not characters inside a line', () => {
+  const cases = [
+    // One paragraph whose second line holds list, table and heading markers.
+    ['p'.repeat(150) + '\n' + 'x - y | z # w 1. v'.padEnd(150, 'q') + '\n', 1],
+    // A list item with a "#" inside, then its continuation: one rule.
+    ['- a #b'.padEnd(200, 'c') + '\n' + 'd'.repeat(150) + '\n', 1],
+    // A list item, then a level-2 heading: two rules.
+    [item(200) + '\n' + '## '.padEnd(200, 'h') + '\n', 0],
+    // A heading, then a paragraph without a blank line: two rules.
+    ['## '.padEnd(150, 'h') + '\n' + 'p'.repeat(200) + '\n', 0],
+    // Numbered items past 9: separate rules.
+    ['9. '.padEnd(200, 'n') + '\n' + '10. '.padEnd(200, 'n') + '\n', 0],
+    // A table row, then another: separate rules.
+    ['| '.padEnd(200, 't') + '\n' + '| '.padEnd(200, 't') + '\n', 0],
+  ];
+  for (const [added, code] of cases) {
+    const dir = based();
+    write(dir, 'AGENTS.md', BASE_FILE + '\n' + added);
+    const r = check(dir, '--base', 'HEAD');
+    assert.equal(r.code, code, `${added}\n${r.err}`);
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test('amendment: a changed single line and a hunk of ten lines or more are both read', () => {
+  let dir = based();
+  write(dir, 'AGENTS.md', BASE_FILE.replace('- Data lives in `data/`.', item(400)));
+  let r = check(dir, '--base', 'HEAD');
+  assert.match(r.err, /^AGENTS\.md:16: amendment: this rule adds 37\d characters/m);
+  rmSync(dir, { recursive: true });
+  dir = based();
+  write(dir, 'AGENTS.md', BASE_FILE + Array.from({ length: 12 }, () => item(130)).join('\n') + '\n');
+  r = check(dir, '--base', 'HEAD');
+  assert.match(r.err, /this block adds 1560 characters/);
+  rmSync(dir, { recursive: true });
+  const base = BASE_FILE + lines(12, '- old') + lines(10, '- kept');
+  dir = based({ 'AGENTS.md': base });
+  write(dir, 'AGENTS.md', BASE_FILE + item(400) + '\n' + lines(10, '- kept'));
+  r = check(dir, '--base', 'HEAD');
+  assert.match(r.err, /this rule adds 395 characters/);
+  rmSync(dir, { recursive: true });
+});
+
+test('amendment: a block that replaces longer content adds only the difference', () => {
+  const base = BASE_FILE + lines(6, '- a') + item(400) + '\n' + item(400) + '\n';
+  const dir = based({ 'AGENTS.md': base });
+  write(dir, 'AGENTS.md', BASE_FILE + lines(6, item(300)));
+  const r = check(dir, '--base', 'HEAD');
+  assert.equal(r.code, 0, r.err);
+  rmSync(dir, { recursive: true });
+});
+
+test('amendment: indentation and Windows line endings do not count', () => {
+  const crlf = (text) => text.replace(/\n/g, '\r\n');
+  const dir = based({ 'AGENTS.md': crlf(BASE_FILE) });
+  write(dir, 'AGENTS.md', crlf(BASE_FILE + item(250) + '\n' + '    ' + 'c'.repeat(49) + '\n'));
+  const r = check(dir, '--base', 'HEAD');
+  assert.equal(r.code, 0, r.err);
+  rmSync(dir, { recursive: true });
+});
+
 test('rewrite: when most of the file changed, only the file budget applies', () => {
   const dir = based();
   write(dir, 'AGENTS.md', '# New\n\n' + item(400) + '\n' + item(400) + '\n');
@@ -435,13 +516,13 @@ test('an unknown base fails and says so', () => {
   const dir = based();
   const r = check(dir, '--base', 'nope');
   assert.equal(r.code, 2);
-  assert.match(r.err, /base nope/);
+  assert.match(r.err, /base nope, or no common history with HEAD\. Fetch it first/);
   rmSync(dir, { recursive: true });
 });
 
 test('a malformed argument prints the usage', () => {
   const dir = repo({});
-  for (const args of [['--why'], ['--base'], ['--base', '']]) {
+  for (const args of [['--why'], ['--base'], ['--base', ''], ['--why', 'HEAD'], ['--base', 'HEAD', 'x']]) {
     const r = check(dir, ...args);
     assert.equal(r.code, 2, args.join(' '));
     assert.match(r.err, /usage: check-agents-md\.mjs \[--base <ref>\]/);

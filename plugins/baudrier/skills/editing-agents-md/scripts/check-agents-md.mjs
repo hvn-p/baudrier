@@ -40,15 +40,13 @@ const HISTORY = [
   /\bas of\b/i,
 ];
 
-// ADAPT: which inline-code spans are repository paths. A span with a slash is
-// one when its first segment exists; a span with one of these extensions
-// always is.
+// ADAPT: which inline-code spans are checked as repository paths: those with
+// one of these extensions, and those whose first segment exists.
 const EXTENSIONS = /\.(md|mdx|txt|json|jsonc|ya?ml|toml|lock|[cm]?[jt]sx?|py|rb|go|rs|sh|sql)$/i;
 
-function looksLikePath(span) {
-  // Commands, URLs, globs, placeholders; home, absolute, package or flag.
-  if (/\s|:\/\/|[*?[\]{}<>$]/.test(span) || /^[~/@-]/.test(span)) return false;
-  return span.includes('/') || EXTENSIONS.test(span);
+function couldBePath(span) {
+  // Not a command, URL, glob or placeholder; not a home, absolute, package or flag.
+  return !/\s|:\/\/|[*?[\]{}<>$]/.test(span) && !/^[~/@-]/.test(span);
 }
 
 const NAMES = ['AGENTS.md', 'CLAUDE.md'];
@@ -152,7 +150,7 @@ function lineViolations(root, file, lines) {
         );
       }
     }
-    const spans = [...text.matchAll(/`([^`]+)`/g)].map((m) => m[1]).filter(looksLikePath);
+    const spans = [...text.matchAll(/`([^`]+)`/g)].map((m) => m[1]).filter(couldBePath);
     const imported = text.trim().match(/^@([^\s~/]\S*)$/);
     if (imported) spans.push(imported[1]);
     for (const span of spans) {
