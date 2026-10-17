@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// baudrier guard-tests, version 2.
+// baudrier guard-tests, version 3.
 //
 // Detects changes to test files made after a snapshot, and requires one reason
 // per changed file. The script protects itself the same way. It serves the
@@ -62,7 +62,7 @@ function self(root) {
 function fingerprints(cwd) {
   const root = git(cwd, 'rev-parse', '--show-toplevel');
   const script = self(root);
-  const files = git(cwd, 'ls-files', '--cached', '--others', '--exclude-standard')
+  const files = git(root, 'ls-files', '--cached', '--others', '--exclude-standard')
     .split('\n')
     .filter((file) => file && (isProtected(file) || file === script));
   const result = {};
