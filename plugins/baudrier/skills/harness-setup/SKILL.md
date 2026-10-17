@@ -14,12 +14,13 @@ project owns its copies. What each module is for is in the `harness` skill.
 | `editing-agents-md` | a skill, the `check-agents-md.mjs` script and its CI job, a hook that reminds the skill on every write to an AGENTS.md or CLAUDE.md |
 
 Modules live in `${CLAUDE_PLUGIN_ROOT}/skills/harness-setup/modules/<module>/`,
-each with the same layout:
+each with the same layout. Skill and agent files carry a `.template` suffix so
+that the plugin never loads them; drop it on copy.
 
 | In the module | In the project |
 |---|---|
-| `skill/SKILL.md` | `.claude/skills/<module>/SKILL.md` |
-| `agents/*.md` | `.claude/agents/` |
+| `skill/SKILL.md.template` | `.claude/skills/<module>/SKILL.md` |
+| `agents/*.md.template` | `.claude/agents/*.md` |
 | `scripts/*` | the project's scripts folder |
 | `hooks/*.mjs` | `.claude/hooks/` |
 | `hooks/settings.json` | merged into `.claude/settings.json` |
