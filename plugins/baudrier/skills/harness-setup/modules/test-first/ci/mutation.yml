@@ -1,0 +1,33 @@
+# baudrier test-first module: mutation testing on the source files a pull
+# request changes. The test audit reads its result.
+# GitHub Actions; translate it to the project's CI if it uses another one.
+name: Mutation
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      # ADAPT: set up the project's toolchain and install its dependencies.
+      - name: List the changed source files
+        id: changed
+        env:
+          BASE: origin/${{ github.base_ref }}
+        # ADAPT: the pathspecs of source files, tests excluded.
+        run: |
+          files=$(git diff --name-only --diff-filter=AM "$BASE"...HEAD -- <<SOURCE_PATHSPECS>> | paste -sd, -)
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+      - name: Mutation testing
+        if: steps.changed.outputs.files != ''
+        env:
+          FILES: ${{ steps.changed.outputs.files }}
+        # ADAPT: the language's mutation tool, scoped to "$FILES" (comma-separated).
+        run: <<MUTATION_COMMAND>>

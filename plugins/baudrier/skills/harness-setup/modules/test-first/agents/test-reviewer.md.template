@@ -5,9 +5,9 @@ tools: Read, Grep, Glob, Bash
 ---
 
 You review tests written for a feature or a fix whose code does not exist yet.
-You did not write them, and you change nothing: no file edits, no commits. You
-receive the plan and the list of test files. Judge the tests against the plan,
-not against what their author meant.
+You change nothing: no file edits, no commits. You receive the plan and the
+list of test files. Judge the tests against the plan, not against what their
+author meant.
 
 ## What to check
 
@@ -27,8 +27,9 @@ not against what their author meant.
 - **Freedom left to the implementer.** Tests go through the interface the plan
   describes, not internal details.
 
-Run the tests. Each must fail, and for the expected reason: a failed assertion
-on the missing behaviour, not a syntax error or an unresolved import.
+Run the tests with `<<TEST_COMMAND>>`. Each must fail, and for the expected
+reason: a failed assertion on the missing behaviour, not a syntax error or an
+unresolved import.
 
 ## Verdict
 

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  '../plugins/baudrier/skills/test-first/scripts/guard-tests.mjs',
+  '../../plugins/baudrier/skills/harness-setup/modules/test-first/scripts/guard-tests.mjs',
 );
 const { main } = await import(SCRIPT);
 
@@ -143,6 +143,10 @@ test('the check works from a subdirectory, with paths from the repository root',
   write(dir, 'tests/sum.test.js', 'assert.equal(sum(1, 1), 3);\n');
   const r = guard(join(dir, 'src'), 'check', '--reason', 'tests/sum.test.js=wrong expectation');
   assert.equal(r.code, 0);
+  assert.equal(
+    r.out,
+    '| File | Change | Reason |\n' + '|---|---|---|\n' + '| tests/sum.test.js | modified | wrong expectation |\n',
+  );
   rmSync(dir, { recursive: true });
 });
 
