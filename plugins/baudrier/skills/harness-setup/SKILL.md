@@ -37,7 +37,8 @@ use it: the module scripts run in CI. When it has none, propose `scripts/`.
 
 Each script and CI file carries a version line, each skill and agent a
 `# baudrier <name> <kind>, version <n>.` comment in its frontmatter. A copy
-keeps its mark as it is. JSON files carry none.
+keeps its mark as it is; CI steps added to an existing job carry their file's
+mark as a comment above them. JSON files carry none.
 
 ## The manifest
 
@@ -171,17 +172,19 @@ For each module of `.claude/baudrier.json` older than the plugin:
 2. Fetch the module's templates at the installed version. Each release is a
    tag `v<version>` of the plugin's repository (`repository` in its
    `plugin.json`): clone it with `git clone --quiet --filter=blob:none` into a
-   temporary directory, then
-   `git show v<version>:plugins/baudrier/skills/harness-setup/modules/<module>/<file>`.
+   temporary directory. In the module's directory there,
+   `plugins/baudrier/skills/harness-setup/modules/<module>/`,
+   `git ls-tree -r --name-only v<version>` lists its files and
+   `git show v<version>:./<path>` gives each one.
 3. For each file, compare the old template, the new one and the project's
    copy:
    - the two templates are identical: nothing to do;
-   - otherwise merge into the copy with
-     `git merge-file -p --diff3 <copy> <old template> <new template>`, and read
+   - otherwise merge into the copy, in place, with
+     `git merge-file --diff3 <copy> <old template> <new template>`, and read
      the templates' diff (`git diff --no-index <old> <new>`). Show the user
-     every hunk that touches a placeholder or an `ADAPT` part, or that the
-     merge left in conflict, with the copy's text, and decide each with them.
-     The rest of the merge stands;
+     every hunk that touches a placeholder or an `ADAPT` part (the comment
+     and the code under it), or that the merge left in conflict, with the
+     copy's text, and decide each with them. The rest of the merge stands;
    - a CI job inside an existing workflow, or `settings.json`: apply the
      templates' diff by hand to the part it became, same rule;
    - a file recorded as `null`: show the diff, for the project's own
