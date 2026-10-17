@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const SCRIPT = resolve(dirname(fileURLToPath(import.meta.url)), '../plugins/baudrier/hooks/agents-md-reminder.mjs');
+const SCRIPT = resolve(dirname(fileURLToPath(import.meta.url)), '../../plugins/baudrier/skills/harness-setup/modules/editing-agents-md/hooks/agents-md-reminder.mjs');
 const { reminder } = await import(SCRIPT);
 
 const input = (tool_name, file_path) => ({ hook_event_name: 'PreToolUse', tool_name, tool_input: { file_path } });

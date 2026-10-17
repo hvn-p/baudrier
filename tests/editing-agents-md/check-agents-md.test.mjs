@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  '../plugins/baudrier/skills/editing-agents-md/scripts/check-agents-md.mjs',
+  '../../plugins/baudrier/skills/harness-setup/modules/editing-agents-md/scripts/check-agents-md.mjs',
 );
 const { main } = await import(SCRIPT);
 

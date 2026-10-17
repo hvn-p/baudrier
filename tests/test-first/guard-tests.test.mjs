@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  '../plugins/baudrier/skills/test-first/scripts/guard-tests.mjs',
+  '../../plugins/baudrier/skills/harness-setup/modules/test-first/scripts/guard-tests.mjs',
 );
 const { main } = await import(SCRIPT);
 

@@ -5,12 +5,12 @@
 // and not ignored): a CLAUDE.md and an AGENTS.md side by side are one file, the
 // root file stays within its line budget, no line carries history, every cited
 // path exists. With --base, what the changes since the base add stays within
-// the amendment limits. It serves the editing-agents-md skill of the baudrier
+// the amendment limits. It serves the editing-agents-md module of the baudrier
 // plugin.
 //
-// This is a reference script: copy it into the project, then adapt the parts
-// marked ADAPT. Keep the version line above so a review can tell how far a
-// copy has drifted from the reference.
+// This is a reference script: the harness-setup skill copies it into a project
+// and adapts the parts marked ADAPT. Keep the version line above so a review
+// can tell how far a copy has drifted from the reference.
 //
 // Usage:
 //   node check-agents-md.mjs [--base <ref>]
@@ -51,7 +51,7 @@ function couldBePath(span) {
 
 const NAMES = ['AGENTS.md', 'CLAUDE.md'];
 const USAGE = 'usage: check-agents-md.mjs [--base <ref>]';
-const SKILL = 'Follow the editing-agents-md skill (baudrier plugin) to fix them.';
+const SKILL = "Follow the project's editing-agents-md skill to fix them.";
 
 class Failure extends Error {
   constructor(code, message) {
