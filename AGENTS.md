@@ -11,3 +11,4 @@
   with the shared layout. See
   [0001](docs/decisions/0001-knowledge-and-modules.md).
 - Plans live in GitHub issues; decisions in `docs/decisions/`.
+- Checked on 2026-10-17, see `docs/missing.md`.
