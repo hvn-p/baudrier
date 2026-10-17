@@ -111,7 +111,7 @@ repository.
 
 Blocking writes to test files is heavy and always bypassable by some forgotten
 path. Detecting changes and requiring a reason covers the same cases with a
-small script: [`scripts/test-guard.mjs`](scripts/test-guard.mjs), in Node,
+small script: [`scripts/guard-tests.mjs`](scripts/guard-tests.mjs), in Node,
 without dependencies.
 
 - `snapshot` records a fingerprint of every protected file (tests and their

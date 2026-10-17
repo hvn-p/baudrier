@@ -8,12 +8,12 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  '../plugins/baudrier/skills/test-first/scripts/test-guard.mjs',
+  '../plugins/baudrier/skills/test-first/scripts/guard-tests.mjs',
 );
 const { main } = await import(SCRIPT);
 
 function repo(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'test-guard-'));
+  const dir = mkdtempSync(join(tmpdir(), 'guard-tests-'));
   spawnSync('git', ['init', '-q'], { cwd: dir });
   for (const [path, content] of Object.entries(files)) write(dir, path, content);
   return dir;
@@ -231,7 +231,7 @@ test('a malformed argument is refused with a message saying what is expected', (
 });
 
 test('outside a git repository, it fails and says why', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'test-guard-'));
+  const dir = mkdtempSync(join(tmpdir(), 'guard-tests-'));
   const r = guard(dir, 'snapshot');
   assert.equal(r.code, 2);
   assert.match(r.err, /git repository/);
