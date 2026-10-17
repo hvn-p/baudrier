@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-// baudrier check-agents-md, version 1.
+// baudrier check-agents-md, version 2.
 //
 // Checks every AGENTS.md and CLAUDE.md of the repository (tracked, or untracked
 // and not ignored): a CLAUDE.md and an AGENTS.md side by side are one file, the
 // root file stays within its line budget, no line carries history, every cited
-// path exists. With --base, what the changes since the base add stays within
+// path exists in the repository (tracked, or untracked and not ignored, so the
+// result is the same in a fresh clone). With --base, what the changes since the base add stays within
 // the amendment limits. It serves the editing-agents-md module of the baudrier
 // plugin.
 //
@@ -88,13 +89,22 @@ function splitLines(text) {
   return lines;
 }
 
-// Instruction files on disk, real files before symlinks so that a symlinked
-// pair is read once, under the name of the real file.
-function instructionFiles(root) {
+// The repository's files on disk (tracked, or untracked and not ignored), and
+// every directory that holds one: what a fresh clone has.
+function repositoryPaths(root) {
   const listed = git(root, 'ls-files', '--cached', '--others', '--exclude-standard');
-  const files = [...new Set(splitLines(listed))]
-    .filter((file) => NAMES.includes(posix.basename(file)) && existsSync(join(root, file)))
-    .sort();
+  const files = [...new Set(splitLines(listed))].filter((file) => existsSync(join(root, file)));
+  const paths = new Set(['.']);
+  for (const file of files) {
+    for (let path = file; path !== '.'; path = posix.dirname(path)) paths.add(path);
+  }
+  return { files, paths };
+}
+
+// Instruction files, real files before symlinks so that a symlinked pair is
+// read once, under the name of the real file.
+function instructionFiles(root, listed) {
+  const files = listed.filter((file) => NAMES.includes(posix.basename(file))).sort();
   const symlink = (file) => lstatSync(join(root, file)).isSymbolicLink();
   return [...files.filter((f) => !symlink(f)), ...files.filter(symlink)];
 }
@@ -132,11 +142,13 @@ function proseLines(lines) {
   return result;
 }
 
-function exists(root, file, path) {
-  return existsSync(join(root, posix.dirname(file), path)) || existsSync(join(root, path));
+// Where a cited path resolves: from the file's directory, then from the root.
+function candidates(file, path) {
+  return [posix.join(posix.dirname(file), path), posix.normalize(path)].map((p) => p.replace(/\/$/, '') || '.');
 }
 
-function lineViolations(root, file, lines) {
+function lineViolations(root, paths, file, lines) {
+  const exists = (path) => candidates(file, path).some((p) => paths.has(p));
   const errors = [];
   for (const { number, text } of proseLines(lines)) {
     const where = `${file}:${number}`;
@@ -156,8 +168,14 @@ function lineViolations(root, file, lines) {
     for (const span of spans) {
       const path = span.replace(/:\d+(:\d+)?$/, '');
       const first = path.replace(/^\.\//, '').split('/')[0];
-      const checked = imported?.[1] === span || EXTENSIONS.test(path) || exists(root, file, first);
-      if (checked && !exists(root, file, path)) {
+      const checked = imported?.[1] === span || EXTENSIONS.test(path) || exists(first);
+      if (!checked || exists(path)) continue;
+      if (candidates(file, path).some((p) => !p.startsWith('..') && existsSync(join(root, p)))) {
+        errors.push(
+          `${where}: reference: \`${span}\` is ignored by git, so a fresh clone and CI do not have it. ` +
+            'Cite a file of the repository, or remove it.',
+        );
+      } else {
         errors.push(`${where}: reference: \`${span}\` does not exist. Fix the path or remove it.`);
       }
     }
@@ -254,7 +272,8 @@ function check(cwd, args) {
   const ref = parseArgs(args);
   const root = git(cwd, 'rev-parse', '--show-toplevel').trim();
   const base = ref && mergeBase(root, ref);
-  const files = instructionFiles(root);
+  const { files: listed, paths } = repositoryPaths(root);
+  const files = instructionFiles(root, listed);
   if (!files.length) return 'check-agents-md: no AGENTS.md or CLAUDE.md found.\n';
 
   const errors = pairViolations(root, files);
@@ -270,7 +289,7 @@ function check(cwd, args) {
           'Move what only some tasks need into nested files, skills or docs, and point to them.',
       );
     }
-    errors.push(...lineViolations(root, file, lines));
+    errors.push(...lineViolations(root, paths, file, lines));
     if (base) errors.push(...amendmentViolations(root, file, base));
   }
   if (errors.length) throw new Failure(1, `${errors.join('\n')}\n${SKILL}`);

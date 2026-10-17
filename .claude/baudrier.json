@@ -1,7 +1,7 @@
 {
   "modules": {
     "test-first": {
-      "version": "0.8.0",
+      "version": "0.9.0",
       "files": {
         "skill/SKILL.md.template": ".claude/skills/test-first/SKILL.md",
         "agents/implementer.md.template": ".claude/agents/implementer.md",
@@ -13,7 +13,7 @@
       }
     },
     "editing-agents-md": {
-      "version": "0.8.0",
+      "version": "0.9.0",
       "files": {
         "skill/SKILL.md.template": ".claude/skills/editing-agents-md/SKILL.md",
         "scripts/check-agents-md.mjs": ".github/scripts/check-agents-md.mjs",

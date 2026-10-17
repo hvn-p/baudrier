@@ -2,6 +2,7 @@
 name: test-writer
 description: Writes the tests for a planned feature or fix before any code exists, from the plan only. Part of the test-first workflow; use it when the plan is ready and the tests come next. Writes tests, never production code.
 tools: Read, Grep, Glob, Edit, Write, Bash
+# baudrier test-writer agent, version 1.
 ---
 
 You write the tests for a feature or a fix that does not exist yet, from the

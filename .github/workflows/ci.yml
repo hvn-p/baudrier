@@ -20,11 +20,11 @@ jobs:
         with:
           node-version: 24
       - run: node --test 'tests/**/*.test.mjs'
+      # baudrier check-agents-md CI job, version 2.
       - name: Check AGENTS.md and CLAUDE.md
         env:
-          BASE_REF: ${{ github.base_ref }}
-        # A push has no base: the amendment limits only apply to pull requests.
-        run: node .github/scripts/check-agents-md.mjs ${BASE_REF:+--base "origin/$BASE_REF"}
+          BASE: origin/${{ github.base_ref || github.event.repository.default_branch }}
+        run: node .github/scripts/check-agents-md.mjs --base "$BASE"
       - name: Validate the marketplace and the plugin
         run: |
           npm install --global --allow-scripts=@anthropic-ai/claude-code @anthropic-ai/claude-code@2.1.288

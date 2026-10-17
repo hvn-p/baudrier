@@ -1,6 +1,7 @@
 ---
 name: test-first
 description: Develop a planned feature or fix in this project with the tests written first by one agent, reviewed from a fresh context, then the code written by another agent under the test guard. Use when implementing a planned feature or fix.
+# baudrier test-first skill, version 2.
 ---
 
 # Test-first development
@@ -53,11 +54,11 @@ In this project:
    consequences, decide it as an open point, update the plan, and go back to
    the step it affects: the tests first if the expected behaviour changes.
 5. **Audit and review.** Push the branch, start `stryker` (Mutation
-   workflow), and wait for CI, including it. Give `test-auditor` the plan and
-   the implementer's report. Send surviving mutants it reports to
-   `test-writer`, then through a review and a new snapshot; a mutant that
-   reveals a behaviour nobody decided is an open point first. Have the code
-   reviewed by the repository owner on the pull request.
+   workflow) if it runs on demand, and wait for CI, including it. Give
+   `test-auditor` the plan and the implementer's report. Send surviving
+   mutants it reports to `test-writer`, then through a review and a new
+   snapshot; a mutant that reveals a behaviour nobody decided is an open point
+   first. Have the code reviewed by the repository owner on the pull request.
 6. **Disputed reasons** go to a human, with the reason and the auditor's
    objection side by side.
 
