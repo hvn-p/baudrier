@@ -15,7 +15,8 @@ plugin, under "What the agent reads".
 |---|---|
 | A rule a program can enforce | A check (lint, test, hook, CI), pointed to in one line |
 | History, an incident | GitHub issues and pull requests |
-| A decision | An ADR in `docs/decisions/` |
+| A design | A GitHub issue |
+| A change of direction | An ADR in `docs/decisions/` |
 | An explanation of the code | Nowhere: the code and its comments carry it |
 | Needed for a minority of tasks | A nested file or a skill |
 | A directive almost every task needs | The file |

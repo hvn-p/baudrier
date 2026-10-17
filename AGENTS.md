@@ -10,4 +10,5 @@
   installs is a module in `plugins/baudrier/skills/harness-setup/modules/`
   with the shared layout. See
   [0001](docs/decisions/0001-knowledge-and-modules.md).
-- Plans live in GitHub issues; decisions in `docs/decisions/`.
+- Plans and designs live in GitHub issues; a change of direction gets an
+  ADR in `docs/decisions/`.
