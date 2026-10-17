@@ -25,8 +25,8 @@ Then restart the session.
 
 ## Use
 
-- Review a harness: mention `@agent-baudrier:harness-reviewer`, or run
-  `claude --agent baudrier:harness-reviewer` from the project's directory.
+- Review a harness: mention `@agent-baudrier:harness-reviewer` in a session
+  opened in the project's directory.
 - Develop with test-first: ask for it by name; to set the guard up in a
   project, ask to "set up test-first".
 

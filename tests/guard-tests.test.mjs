@@ -1,19 +1,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SCRIPT = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  '../plugins/baudrier/skills/test-first/scripts/test-guard.mjs',
+  '../plugins/baudrier/skills/test-first/scripts/guard-tests.mjs',
 );
 const { main } = await import(SCRIPT);
 
 function repo(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'test-guard-'));
+  const dir = mkdtempSync(join(tmpdir(), 'guard-tests-'));
   spawnSync('git', ['init', '-q'], { cwd: dir });
   for (const [path, content] of Object.entries(files)) write(dir, path, content);
   return dir;
@@ -38,7 +38,7 @@ test('check without a snapshot fails and says to take one', () => {
   const dir = repo(BASE);
   const r = guard(dir, 'check');
   assert.equal(r.code, 2);
-  assert.match(r.err, /snapshot/);
+  assert.match(r.err, /no snapshot\. Take one with `snapshot`/);
   rmSync(dir, { recursive: true });
 });
 
@@ -97,7 +97,12 @@ test('a reason per changed file passes and prints the table for the report', () 
   write(dir, 'tests/sum.test.js', 'assert.equal(sum(1, 1), 3);\n');
   const r = guard(dir, 'check', '--reason', 'tests/sum.test.js=the plan says 1+1 is 3');
   assert.equal(r.code, 0);
-  assert.match(r.out, /\| tests\/sum\.test\.js \| modified \| the plan says 1\+1 is 3 \|/);
+  assert.equal(
+    r.out,
+    '| File | Change | Reason |\n' +
+      '|---|---|---|\n' +
+      '| tests/sum.test.js | modified | the plan says 1+1 is 3 |\n',
+  );
   rmSync(dir, { recursive: true });
 });
 
@@ -172,6 +177,52 @@ test('run from the command line, it prints its output and sets the exit code', (
   rmSync(dir, { recursive: true });
 });
 
+test('run from the command line, a justified change prints the whole table on stdout', () => {
+  const dir = repo(BASE);
+  const run = (...args) =>
+    spawnSync(process.execPath, [SCRIPT, ...args], { cwd: dir, encoding: 'utf8' });
+  run('snapshot');
+  write(dir, 'tests/sum.test.js', 'assert.equal(sum(1, 1), 3);\n');
+  const r = run('check', '--reason', 'tests/sum.test.js=the plan says 1+1 is 3');
+  assert.equal(r.status, 0);
+  assert.equal(
+    r.stdout,
+    '| File | Change | Reason |\n' +
+      '|---|---|---|\n' +
+      '| tests/sum.test.js | modified | the plan says 1+1 is 3 |\n',
+  );
+  assert.equal(r.stderr, '');
+  rmSync(dir, { recursive: true });
+});
+
+test('the guard protects its own copy, without the project listing it', () => {
+  const dir = repo({ ...BASE, 'scripts/guard-tests.mjs': readFileSync(SCRIPT) });
+  const run = (...args) =>
+    spawnSync(process.execPath, ['scripts/guard-tests.mjs', ...args], { cwd: dir, encoding: 'utf8' });
+  assert.equal(run('snapshot').status, 0);
+  assert.equal(run('check').status, 0);
+  writeFileSync(join(dir, 'scripts/guard-tests.mjs'), '// neutralised\n', { flag: 'a' });
+  const r = run('check');
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /modified\s+scripts\/guard-tests\.mjs/);
+  rmSync(dir, { recursive: true });
+});
+
+test('a corrupted snapshot fails with a clear message', () => {
+  const dir = repo(BASE);
+  guard(dir, 'snapshot');
+  const gitDir = spawnSync('git', ['rev-parse', '--absolute-git-dir'], { cwd: dir, encoding: 'utf8' });
+  const path = join(gitDir.stdout.trim(), 'baudrier-guard-tests.json');
+  assert.ok(readFileSync(path, 'utf8'));
+  for (const content of ['{"tests/sum.test.js": "ab', 'null', '5']) {
+    writeFileSync(path, content);
+    const r = guard(dir, 'check');
+    assert.equal(r.code, 2);
+    assert.match(r.err, /snapshot.*corrupted/);
+  }
+  rmSync(dir, { recursive: true });
+});
+
 test('protected files: test directories at any depth, and test or spec files', () => {
   const dir = repo(BASE);
   guard(dir, 'snapshot');
@@ -231,7 +282,7 @@ test('a malformed argument is refused with a message saying what is expected', (
 });
 
 test('outside a git repository, it fails and says why', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'test-guard-'));
+  const dir = mkdtempSync(join(tmpdir(), 'guard-tests-'));
   const r = guard(dir, 'snapshot');
   assert.equal(r.code, 2);
   assert.match(r.err, /git repository/);

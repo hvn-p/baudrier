@@ -1,21 +1,22 @@
 #!/usr/bin/env node
-// baudrier test-guard, version 1.
+// baudrier guard-tests, version 2.
 //
 // Detects changes to test files made after a snapshot, and requires one reason
-// per changed file. It serves the test-first skill of the baudrier plugin.
+// per changed file. The script protects itself the same way. It serves the
+// test-first skill of the baudrier plugin.
 //
 // This is a reference script: copy it into the project, then adapt the parts
 // marked ADAPT. Keep the version line above so a review can tell how far a
 // copy has drifted from the reference.
 //
 // Usage:
-//   node test-guard.mjs snapshot
-//   node test-guard.mjs check [--reason <file>=<reason>]...
+//   node guard-tests.mjs snapshot
+//   node guard-tests.mjs check [--reason <file>=<reason>]...
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // ADAPT: what counts as a protected file in this project, as a path relative
@@ -31,10 +32,10 @@ function isProtected(file) {
 // ADAPT: where the snapshot is stored. Inside the git directory by default:
 // never versioned, and separate for each worktree.
 function snapshotPath(cwd) {
-  return join(git(cwd, 'rev-parse', '--absolute-git-dir'), 'baudrier-test-guard.json');
+  return join(git(cwd, 'rev-parse', '--absolute-git-dir'), 'baudrier-guard-tests.json');
 }
 
-const USAGE = 'usage: test-guard.mjs snapshot | check [--reason <file>=<reason>]...';
+const USAGE = 'usage: guard-tests.mjs snapshot | check [--reason <file>=<reason>]...';
 
 class Failure extends Error {
   constructor(code, message) {
@@ -51,11 +52,19 @@ function git(cwd, ...args) {
   }
 }
 
+// This script's path relative to the repository root, so that changing the
+// guard itself counts as a protected change.
+function self(root) {
+  const path = relative(realpathSync(root), realpathSync(fileURLToPath(import.meta.url)));
+  return path.split(sep).join('/');
+}
+
 function fingerprints(cwd) {
   const root = git(cwd, 'rev-parse', '--show-toplevel');
+  const script = self(root);
   const files = git(cwd, 'ls-files', '--cached', '--others', '--exclude-standard')
     .split('\n')
-    .filter((file) => file && isProtected(file));
+    .filter((file) => file && (isProtected(file) || file === script));
   const result = {};
   for (const file of files) {
     const path = join(root, file);
@@ -92,7 +101,21 @@ function parseReasons(args) {
 
 function snapshot(cwd) {
   writeFileSync(snapshotPath(cwd), JSON.stringify(fingerprints(cwd), null, 2));
-  return 'test-guard: snapshot taken.\n';
+  return 'guard-tests: snapshot taken.\n';
+}
+
+function readSnapshot(path) {
+  try {
+    const data = JSON.parse(readFileSync(path, 'utf8'));
+    if (typeof data === 'object' && data !== null) return data;
+  } catch {
+    // Unreadable or not JSON: reported below, like any other corruption.
+  }
+  throw new Failure(
+    2,
+    `the snapshot is corrupted (${path}).\n` +
+      'Take a new one only once the tests are back to their reviewed state.',
+  );
 }
 
 function check(cwd, args) {
@@ -100,7 +123,7 @@ function check(cwd, args) {
   if (!existsSync(snapshotPath(cwd))) {
     throw new Failure(2, 'no snapshot. Take one with `snapshot` before development starts.');
   }
-  const before = JSON.parse(readFileSync(snapshotPath(cwd), 'utf8'));
+  const before = readSnapshot(snapshotPath(cwd));
   const found = changes(before, fingerprints(cwd));
   const changed = new Set(found.map((c) => c.file));
 
@@ -116,12 +139,12 @@ function check(cwd, args) {
     errors.push(
       `tests changed since the snapshot, without a reason:\n${list}\n` +
         'Undo each change, or justify it, one reason per file:\n' +
-        `  node test-guard.mjs check ${example}`,
+        `  node guard-tests.mjs check ${example}`,
     );
   }
   if (errors.length) throw new Failure(1, errors.join('\n'));
 
-  if (!found.length) return 'test-guard: no test changed since the snapshot.\n';
+  if (!found.length) return 'guard-tests: no test changed since the snapshot.\n';
   const rows = found.map((c) => `| ${c.file} | ${c.kind} | ${reasons[c.file]} |`);
   return ['| File | Change | Reason |', '|---|---|---|', ...rows].join('\n') + '\n';
 }
@@ -135,7 +158,7 @@ export function main(args, cwd = process.cwd()) {
     throw new Failure(2, USAGE);
   } catch (error) {
     if (!(error instanceof Failure)) throw error;
-    return { code: error.code, out: '', err: `test-guard: ${error.message}\n` };
+    return { code: error.code, out: '', err: `guard-tests: ${error.message}\n` };
   }
 }
 

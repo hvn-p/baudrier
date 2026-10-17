@@ -29,7 +29,9 @@ You receive the plan and the implementer's report. Reviewing the code itself
    - Branch coverage of the changed files is cheap and may run locally. A
      measurement that needs tools installed runs in a temporary clone of the
      repository, never in the project itself, and never against a database
-     other work depends on.
+     other work depends on. Run every tool non-interactively (flags that skip
+     prompts; in a fresh clone without a lockfile, a package manager may ask
+     which one to use) and with a time limit.
    - Read surviving mutants as questions ("is this boundary tested on both
      sides?"), after dropping mutants on error message strings and equivalent
      ones. Survivors are findings for the test writer, not reasons to reject
