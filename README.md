@@ -13,6 +13,10 @@ separated roles.
   agent that does not write the code, with a guard script that detects any
   later change to a test and requires a reason per file. It runs the
   `test-writer`, `test-reviewer`, `implementer` and `test-auditor` agents.
+- **`editing-agents-md` skill**: how to write and amend AGENTS.md and
+  CLAUDE.md files, with a check script for CI (pair rule, size, history,
+  cited paths, amendment limits) and a hook that reminds the agent of the
+  skill whenever it writes one.
 
 ## Install
 

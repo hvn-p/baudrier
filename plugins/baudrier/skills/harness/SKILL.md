@@ -167,7 +167,8 @@ hypothesis.
 
 **Instruction files hold instructions only.** `CLAUDE.md`, `AGENTS.md` and
 their equivalents carry rules, never history or session logs. They stay short
-and point to deeper documentation.
+and point to deeper documentation. The `editing-agents-md` skill covers how to
+write and amend them.
 *Missing when*: dated entries, "we did", "was removed", session summaries,
 facts that contradict the code (a framework version that moved on).
 

@@ -1,7 +1,11 @@
 {
   "testRunner": "command",
   "commandRunner": { "command": "node --test 'tests/**/*.test.mjs'" },
-  "mutate": ["plugins/baudrier/skills/test-first/scripts/**"],
+  "mutate": [
+    "plugins/baudrier/skills/test-first/scripts/**",
+    "plugins/baudrier/skills/editing-agents-md/scripts/**",
+    "plugins/baudrier/hooks/*.mjs"
+  ],
   "concurrency": 2,
   "reporters": ["clear-text", "progress"]
 }
