@@ -272,6 +272,31 @@ test('references: a path whose first directory exists is checked even without an
   rmSync(dir, { recursive: true });
 });
 
+test('references: a path git ignores fails as in a fresh clone, saying it is ignored', () => {
+  const dir = repo({
+    'AGENTS.md': '- See `notes/local.md`, `scratch.md` and `data/x.json`.\n- Data lives in `data/`.\n',
+    '.gitignore': 'notes/\n',
+    'notes/local.md': '- x\n',
+    'scratch.md': '- x\n',
+    'data/x.json': '{}',
+  });
+  write(dir, '.git/info/exclude', 'scratch.md\n');
+  const r = check(dir);
+  assert.equal(r.code, 1);
+  assert.match(r.err, /^AGENTS\.md:1: reference: `notes\/local\.md` is ignored by git/m);
+  assert.match(r.err, /^AGENTS\.md:1: reference: `scratch\.md` is ignored by git/m);
+  assert.doesNotMatch(r.err, /data/);
+  rmSync(dir, { recursive: true });
+});
+
+test('references: a directory holding only ignored files does not exist for the check', () => {
+  const dir = repo({ 'AGENTS.md': '- Build output: `dist/app.js`.\n', '.gitignore': 'dist/\n', 'dist/app.js': '' });
+  const r = check(dir);
+  assert.equal(r.code, 1);
+  assert.match(r.err, /`dist\/app\.js` is ignored by git/);
+  rmSync(dir, { recursive: true });
+});
+
 test('references: an import line must resolve from the file directory', () => {
   let dir = repo({ 'CLAUDE.md': '@AGENTS.md\n' });
   let r = check(dir);

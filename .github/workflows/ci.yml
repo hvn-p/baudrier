@@ -20,11 +20,11 @@ jobs:
         with:
           node-version: 24
       - run: node --test 'tests/**/*.test.mjs'
+      # baudrier check-agents-md CI job, version 2.
       - name: Check AGENTS.md and CLAUDE.md
         env:
-          BASE_REF: ${{ github.base_ref }}
-        # A push has no base: the amendment limits only apply to pull requests.
-        run: node .github/scripts/check-agents-md.mjs ${BASE_REF:+--base "origin/$BASE_REF"}
+          BASE: origin/${{ github.base_ref || github.event.repository.default_branch }}
+        run: node .github/scripts/check-agents-md.mjs --base "$BASE"
       - name: Validate the marketplace and the plugin
         run: |
           npm install --global --allow-scripts=@anthropic-ai/claude-code @anthropic-ai/claude-code@2.1.288
@@ -37,3 +37,23 @@ jobs:
         env:
           BASE: origin/${{ github.base_ref }}
         run: .github/scripts/check-version-bump.sh "$BASE"
+
+  tag:
+    # Every published plugin version gets a tag, so an upgrade can fetch the
+    # templates a project installed.
+    if: github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Tag the plugin version
+        run: |
+          tag="v$(jq -r .version plugins/baudrier/.claude-plugin/plugin.json)"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            echo "$tag already exists."
+          else
+            git tag "$tag" "$GITHUB_SHA"
+            git push origin "refs/tags/$tag"
+          fi

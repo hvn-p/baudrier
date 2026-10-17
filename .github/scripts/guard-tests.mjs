@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// baudrier guard-tests, version 3.
+// baudrier guard-tests, version 4.
 //
 // Detects changes to test files made after a snapshot, and requires one reason
 // per changed file. The script protects itself the same way. It serves the
@@ -20,8 +20,9 @@ import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // ADAPT: what counts as a protected file in this project, as a path relative
-// to the repository root. Include the test configuration (runner config, the
-// test script) when changing it could make failing tests pass.
+// to the repository root. Include whatever decides which tests run and how
+// (runner config, the test script, a CI file that holds the test command) when
+// changing it could make failing tests pass.
 function isProtected(file) {
   return file.startsWith('tests/');
 }
@@ -136,7 +137,7 @@ function check(cwd, args) {
     errors.push(
       `tests changed since the snapshot, without a reason:\n${list}\n` +
         'Undo each change, or justify it, one reason per file:\n' +
-        `  node guard-tests.mjs check ${example}`,
+        `  node ${relative(realpathSync(cwd), realpathSync(fileURLToPath(import.meta.url)))} check ${example}`,
     );
   }
   if (errors.length) throw new Failure(1, errors.join('\n'));

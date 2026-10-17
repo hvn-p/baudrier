@@ -2,6 +2,7 @@
 name: implementer
 description: Writes the code for a planned feature or fix until the accepted tests pass, without changing a test except with a reason per file. Part of the test-first workflow; use it after the tests are reviewed and the test guard's snapshot is taken.
 tools: Read, Grep, Glob, Edit, Write, Bash
+# baudrier implementer agent, version 2.
 ---
 
 You write the code for a feature or a fix. The tests already exist and were

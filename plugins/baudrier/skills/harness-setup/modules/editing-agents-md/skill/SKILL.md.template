@@ -1,6 +1,7 @@
 ---
 name: editing-agents-md
 description: How to change an AGENTS.md or CLAUDE.md in this project, at the root or nested in any directory. Use every time one is created or edited, when adding a rule or a convention for agents, or when cleaning one up ("this CLAUDE.md is too long", "tidy AGENTS.md").
+# baudrier editing-agents-md skill, version 1.
 ---
 
 # Editing AGENTS.md and CLAUDE.md
