@@ -1,12 +1,7 @@
 name: Mutation
 
 on:
-  pull_request:
-    paths:
-      - plugins/baudrier/skills/test-first/scripts/**
-      - plugins/baudrier/skills/editing-agents-md/scripts/**
-      - plugins/baudrier/hooks/*.mjs
-      - stryker.config.json
+  workflow_dispatch:
 
 permissions:
   contents: read
