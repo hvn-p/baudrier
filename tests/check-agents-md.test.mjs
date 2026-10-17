@@ -213,6 +213,7 @@ test('references: a cited path that does not exist fails, with line and path', (
     './scripts/x.sh',
     './src/gone',
     'ci.yaml',
+    'ci.yml',
     'tool.mjs',
     'App.tsx',
     'lib.ts',
@@ -468,6 +469,14 @@ test('amendment: a block that replaces longer content adds only the difference',
   write(dir, 'AGENTS.md', BASE_FILE + lines(6, item(300)));
   const r = check(dir, '--base', 'HEAD');
   assert.equal(r.code, 0, r.err);
+  rmSync(dir, { recursive: true });
+});
+
+test('amendment: a removed rule is subtracted once, from the rule that replaces it', () => {
+  const dir = based({ 'AGENTS.md': BASE_FILE + item(290) + '\n' });
+  write(dir, 'AGENTS.md', BASE_FILE + lines(6, item(300)).replace(item(300), item(300).replace('x', 'y')));
+  const r = check(dir, '--base', 'HEAD');
+  assert.match(r.err, /this block adds 1510 characters/);
   rmSync(dir, { recursive: true });
 });
 

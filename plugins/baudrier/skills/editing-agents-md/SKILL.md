@@ -89,8 +89,8 @@ dependencies, checks every AGENTS.md and CLAUDE.md in the repository: the pair
 rule, the root line budget, history markers, and that each cited path exists.
 With `--base <ref>`, it also holds what the changes since that ref add to the
 amendment limits. Each violation names the file, the line and the rule.
-Judgment stays with the agent: the line test, routing, and principles 2 to 4
-and 7 to 8 have no program.
+The line test, the routing and every other principle stay a matter of
+judgment.
 
 ### Setting it up in a project
 
