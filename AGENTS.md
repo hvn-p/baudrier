@@ -18,3 +18,4 @@
   `.claude/skills/editing-agents-md/SKILL.md`, the check
   `.github/scripts/check-agents-md.mjs`, the hook
   `.claude/hooks/agents-md-reminder.mjs`.
+- Decided on 2026-10-17, see `docs/missing.md`.
