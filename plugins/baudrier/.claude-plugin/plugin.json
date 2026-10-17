@@ -1,6 +1,6 @@
 {
   "name": "baudrier",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Principles of a good harness for a coding agent, a reviewer for existing harnesses, and modules that install a test-first workflow and an AGENTS.md check into a project.",
   "author": {
     "name": "hvn-p"

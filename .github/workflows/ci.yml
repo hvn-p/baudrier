@@ -37,3 +37,23 @@ jobs:
         env:
           BASE: origin/${{ github.base_ref }}
         run: .github/scripts/check-version-bump.sh "$BASE"
+
+  tag:
+    # Every published plugin version gets a tag, so an upgrade can fetch the
+    # templates a project installed.
+    if: github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Tag the plugin version
+        run: |
+          tag="v$(jq -r .version plugins/baudrier/.claude-plugin/plugin.json)"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            echo "$tag already exists."
+          else
+            git tag "$tag" "$GITHUB_SHA"
+            git push origin "refs/tags/$tag"
+          fi

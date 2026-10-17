@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SCRIPT = resolve(
@@ -209,6 +209,22 @@ test('the guard protects its own copy, without the project listing it', () => {
   const r = run('check');
   assert.equal(r.status, 1);
   assert.match(r.stderr, /modified\s+scripts\/guard-tests\.mjs/);
+  rmSync(dir, { recursive: true });
+});
+
+test('the way out names the guard by its path from where it was run', () => {
+  const dir = repo({ ...BASE, 'scripts/guard-tests.mjs': readFileSync(SCRIPT) });
+  const run = (cwd, script, ...args) =>
+    spawnSync(process.execPath, [script, ...args], { cwd: join(dir, cwd), encoding: 'utf8' });
+  assert.equal(run('.', 'scripts/guard-tests.mjs', 'snapshot').status, 0);
+  write(dir, 'tests/sum.test.js', 'assert.equal(sum(1, 1), 3);\n');
+  let r = run('.', 'scripts/guard-tests.mjs', 'check');
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /^  node scripts\/guard-tests\.mjs check --reason tests\/sum\.test\.js="<why>"$/m);
+  r = run('src', '../scripts/guard-tests.mjs', 'check');
+  assert.match(r.stderr, /^  node \.\.\/scripts\/guard-tests\.mjs check --reason tests\/sum\.test\.js="<why>"$/m);
+  r = guard(join(dir, 'src'), 'check');
+  assert.ok(r.err.includes(`  node ${relative(join(dir, 'src'), SCRIPT)} check --reason`), r.err);
   rmSync(dir, { recursive: true });
 });
 

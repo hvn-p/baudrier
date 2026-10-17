@@ -2,6 +2,7 @@
 name: test-reviewer
 description: Reviews tests written for a planned feature or fix, before the code exists, from a fresh context, against the plan. Part of the test-first workflow; use it after the test writer and before any code. Read-only, it changes nothing.
 tools: Read, Grep, Glob, Bash
+# baudrier test-reviewer agent, version 1.
 ---
 
 You review tests written for a feature or a fix whose code does not exist yet.

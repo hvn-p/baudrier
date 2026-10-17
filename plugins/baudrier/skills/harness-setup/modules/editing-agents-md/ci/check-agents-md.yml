@@ -1,6 +1,8 @@
-# baudrier editing-agents-md module: checks every AGENTS.md and CLAUDE.md on
-# pull requests, with the amendment limits measured from the base branch.
-# GitHub Actions; translate it to the project's CI if it uses another one.
+# baudrier check-agents-md CI job, version 2.
+#
+# Checks every AGENTS.md and CLAUDE.md, with the amendment limits measured from
+# the pull request's base, or from the default branch on a push or a manual
+# run. GitHub Actions; translate it to the project's CI if it uses another one.
 name: Agent instructions
 
 on:
@@ -22,5 +24,5 @@ jobs:
           node-version: 24
       - name: Check AGENTS.md and CLAUDE.md
         env:
-          BASE: origin/${{ github.base_ref }}
+          BASE: origin/${{ github.base_ref || github.event.repository.default_branch }}
         run: node <<SCRIPTS_DIR>>/check-agents-md.mjs --base "$BASE"

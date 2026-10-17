@@ -11,10 +11,18 @@ install parts of it into a project.
 - **`harness-reviewer` agent**: reviews a project's harness from a fresh
   context and returns recommendations backed by evidence. Read-only.
 - **`harness-setup` skill**: installs modules into a project, adapted to its
-  tools and CI. `test-first`: tests written from the plan and reviewed before
-  the code, by separate agents, with a guard that requires a reason for any
-  changed test. `editing-agents-md`: a procedure for changing AGENTS.md and
-  CLAUDE.md, with a CI check and a reminder hook.
+  tools and CI, and upgrades them to a later plugin version.
+
+## Modules
+
+Every module is optional: a project installs only the ones it and its owner
+want, now or later, and each works without the others.
+
+- **`test-first`**: the test-first loop, with tests written from the plan and
+  reviewed before the code by separate agents, and a guard that requires a
+  reason for any changed test.
+- **`editing-agents-md`**: the procedure for changing AGENTS.md and CLAUDE.md,
+  with a check for CI and a reminder hook.
 
 ## Install
 
@@ -31,7 +39,8 @@ Then restart the session.
   opened in the project's directory.
 - Install modules: ask to "set up the harness with baudrier", or name a
   module ("set up test-first"). Once installed, they are the project's own
-  skills, agents and checks.
+  skills, agents and checks, listed in `.claude/baudrier.json`.
+- Upgrade them after a plugin update: ask to "upgrade the baudrier modules".
 
 ## License
 
