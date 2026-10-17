@@ -22,7 +22,9 @@ jobs:
       - run: node --test 'tests/**/*.test.mjs'
       - name: Validate the marketplace and the plugin
         run: |
-          npm install --global @anthropic-ai/claude-code@2.1.288
+          npm install --global --allow-scripts=@anthropic-ai/claude-code @anthropic-ai/claude-code@2.1.288
+          which claude
+          claude --version
           claude plugin validate --strict .
           claude plugin validate --strict plugins/baudrier
       - name: Require a version bump when the plugin changes
