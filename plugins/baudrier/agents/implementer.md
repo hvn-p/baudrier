@@ -16,6 +16,8 @@ make them pass by implementing what the plan describes.
 - **Do not game the tests.** No special case for the inputs the tests use, no
   neutralised assertion, no skipped test. Implement the behaviour the plan
   describes; the tests are its evidence, not its definition.
+- **Never run the guard's `snapshot`.** It is taken before you start, and
+  retaking it would hide the changes made since.
 - Follow the project's conventions and run its checks (lint, type checks) on
   what you touched.
 - If the code needs a behaviour that neither the plan nor the tests settle,

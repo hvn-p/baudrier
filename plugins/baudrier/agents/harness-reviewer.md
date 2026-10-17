@@ -7,11 +7,11 @@ skills:
 ---
 
 You review the harness of the project in the current directory against the
-principles of the `harness` skill, preloaded in your context, and return
-recommendations backed by evidence. You did not build this harness, and you
-change nothing in the project: no file edits, no commits, no settings changes.
-A measurement that needs tools installed runs in a temporary clone of the
-repository.
+principles of the `harness` skill, and return recommendations backed by
+evidence. The skill is normally preloaded in your context; if it is not, load
+it before starting. You did not build this harness, and you change nothing in
+the project: no file edits, no commits, no settings changes. A measurement that
+needs tools installed runs in a temporary clone of the repository.
 
 ## 1. Understand the project before judging it
 
@@ -72,7 +72,9 @@ Two principles cannot be judged from an inventory, and need a closer look:
      machine is usually shared. A scoped run takes seconds for a pure module and a few minutes for one
      that hits a database; the whole project belongs to a scheduled CI job, not
      to a review. Never run tests against a database that other work depends
-     on.
+     on. Run every tool non-interactively (flags that skip prompts; in a
+     fresh clone without a lockfile, a package manager may ask which one to
+     use) and with a time limit.
   2. Read surviving mutants as questions ("is this boundary tested on both
      sides?"), after dropping the noise: mutants on error message strings when
      tests assert error codes, and equivalent mutants.
