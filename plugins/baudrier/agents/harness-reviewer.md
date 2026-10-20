@@ -29,7 +29,9 @@ Look before concluding. Typical sources:
 - Instruction files (`CLAUDE.md`, `AGENTS.md`, nested ones), skills, agent
   definitions, hooks and settings of every agent in use.
 - Language and lint configuration: strictness, warnings versus errors.
-- Test setup: what exists, at which levels, how it runs, mutation testing.
+- Test setup: what exists, at which levels, how it runs.
+- How code and tests are reviewed: what triggers an AI review at the end of
+  development, in which context it runs, and what its instructions cover.
 - CI workflows, and whether failures block a merge (branch protection or
   rulesets, through the platform's CLI or API when available).
 - How features are specified before being built: issues, specs, the output of
@@ -54,37 +56,35 @@ For each principle: respected, partial, missing, or not applicable, with the
 evidence. "Not applicable" is a valid answer when the project's stakes do not
 justify the principle; say why.
 
-Two principles cannot be judged from an inventory, and need a closer look:
+Three principles cannot be judged from an inventory, and need a closer look:
 
 - **The plan.** Take the specifications of a few recent features and ask
   whether a test author could derive the tests from them without guessing:
   are the behaviours, edge cases and refusals written down, or only the
   intent?
-- **The tests.** Measure before judging, then judge what the measures cannot
-  see.
-  1. Run the deterministic tools in a temporary clone, or read their results
-     in CI. Branch coverage first: line coverage overstates, since a line
-     can count as covered while the error path on it never runs. A test lint if the
-     ecosystem has one (tests without assertions, conditional assertions).
-     Mutation testing on two or three modules that carry real business logic,
-     scoped to those files and their tests, incremental when the tool allows
-     it, with at most two workers and at low priority (`nice`), since the
-     machine is usually shared. A scoped run takes seconds for a pure module and a few minutes for one
-     that hits a database; the whole project belongs to a scheduled CI job, not
-     to a review. Never run tests against a database that other work depends
-     on. Run every tool non-interactively (flags that skip prompts; in a
-     fresh clone without a lockfile, a package manager may ask which one to
-     use) and with a time limit.
-  2. Read surviving mutants as questions ("is this boundary tested on both
-     sides?"), after dropping the noise: mutants on error message strings when
-     tests assert error codes, and equivalent mutants.
-  3. Then judge what no tool sees: behaviours the plan expects and the code
-     does not implement, edge cases nobody thought of, missing layers (an
-     interface with no test, flows across components). Check that the test
-     layers match where the bugs actually come from.
-  If the project has none of these tools, their absence is a recommendation,
-  and the review falls back to reasoning about mutations on a few lines,
-  saying it is reasoning.
+- **The tests.** Judge them by reading them; a cheap measure helps, never
+  replaces the reading. Run no mutation testing.
+  1. Read branch coverage from CI, or run it in a temporary clone when it is
+     cheap: line coverage overstates, since a line can count as covered while
+     the error path on it never runs. A test lint if the ecosystem has one
+     (tests without assertions, conditional assertions). Never run tests
+     against a database that other work depends on. Run every tool
+     non-interactively, with a time limit.
+  2. Read the tests of two or three modules that carry real business logic,
+     with the code they cover. For each test, the behaviour or case it
+     protects; then the behaviours, cases, refusals and boundaries with no
+     test (each boundary on both sides), and the tests that assert nothing,
+     duplicate another, test implementation details, or pass whatever the
+     code does.
+  3. Judge the layers: behaviours the plan expects and the code does not
+     implement, missing layers (an interface with no test, flows across
+     components). Check that the test layers match where the bugs actually
+     come from.
+- **The review.** Find what starts an AI review at the end of development: a
+  workflow step, a hook, a CI job. A review that runs only when someone asks
+  for it is not automatic. Check that it runs in a context that did not write
+  the code, and that something reviews the tests too, not only the code.
+  Recent pull requests show whether it actually ran.
 
 Look for violations as carefully as for good practice. A harness that looks
 complete often hides a guard that never fires, an instruction file that

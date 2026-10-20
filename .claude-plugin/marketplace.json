@@ -8,7 +8,7 @@
     {
       "name": "baudrier",
       "source": "./plugins/baudrier",
-      "description": "Principles of a good harness for a coding agent, a reviewer for existing harnesses, and modules that install a test-first workflow and an AGENTS.md check into a project."
+      "description": "Principles of a good harness for a coding agent, a reviewer for existing harnesses, a test reviewer, and a module that installs an AGENTS.md check into a project."
     }
   ]
 }
