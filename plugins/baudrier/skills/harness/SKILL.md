@@ -19,8 +19,8 @@ documentation, which changes faster than these principles.
 - **Reviewing a harness**: hand it to the `harness-reviewer` agent, which
   starts from a fresh context. Whoever built the harness does not review it.
 - **Installing what a project lacks**: the `harness-setup` skill installs
-  ready-made modules (the test-first workflow, the procedure and check for
-  instruction files) and adapts them to the project.
+  ready-made modules (the procedure and check for instruction files) and
+  adapts them to the project.
 
 Everything here is a recommendation. A project takes what its stakes justify:
 a throwaway prototype needs little, a shared production codebase needs most.
@@ -127,59 +127,63 @@ recommendation is to adopt one.
 *Missing when*: plans that state only the intent; tests that guess what the
 plan leaves open.
 
-**The plan is confirmed, and its open points decided, before any test.** A
+**The plan is confirmed, and its open points decided, before development.** A
 plan read as prose is often approved without being read. Its owner confirms
 it in the form that makes a gap obvious: concrete examples for logic (this
 input gives this result, this one is refused with this code), a mockup for an
 interface, where a missing field or action shows at once. Every open point is
-decided before the tests, since a test fixes the behaviour it expects. A human
-decides what has real consequences (money, data, security, a behaviour users
-or other systems rely on, anything hard to undo); the orchestrating session may
-decide a small point, writes it into the plan, and lists it in its report for
-the owner to confirm or reverse.
+decided before the work that depends on it. A human decides what has real
+consequences (money, data, security, a behaviour users or other systems rely
+on, anything hard to undo); the orchestrating session may decide a small
+point, writes it into the plan, and lists it in its report for the owner to
+confirm or reverse.
 *Missing when*: plans approved as prose only; decisions taken during the work
 that appear nowhere.
 
 **Tests that matter.** Not a coverage percentage, which rewards testing what is
 useless. Every piece of logic, every behaviour, every case including edge
-cases has a test that would fail if it broke. Tools measure it before anyone
-judges it: coverage shows what is surely untested, mutation testing shows
-what is executed but checked by nothing. Tests go beyond the
-code's logic: integration and end-to-end belong to the strategy. Knowing what
-to test is a skill of its own.
+cases has a test that would fail if it broke. Branch coverage shows what is
+surely untested; whether what runs is actually checked takes a reading of the
+tests. Tests go beyond the code's logic: integration and end-to-end belong to
+the strategy. Knowing what to test is a skill of its own.
 *Missing when*: tests assert little or nothing, only unit tests exist for a
 system whose risks are in its integrations, nobody knows which tests would
 catch a regression.
 
-**Tests first, reviewed, then protected.** One agent writes the tests from the
-plan, they are reviewed from a fresh context, then another agent writes the
-code. Modifying a test is not prevented but detected, and each modified test
-needs its own reason, judged by a reviewer: blocking writes to tests is heavy
-and always bypassable by some forgotten path, while detection covers the same
-cases with a small script. Detection does not see production code that games
-the tests (a special case for the inputs they use, a neutralised assertion);
-an audit from a fresh context looks for it. The `test-first` module of
-`harness-setup` installs this workflow.
-*Missing when*: tests and code written in one pass by one agent; tests changed
-during development without a trace or a reason.
+**An AI reviews the code at the end of development, automatically, from a
+fresh context.** A review that someone has to remember to ask for gets
+forgotten, so the end of development triggers it: a step of the workflow, a
+hook, a CI job. It runs in a context that did not write the code (one role per
+agent). The project sets it up with its own tools, for example Anthropic's
+code-review plugin.
+*Missing when*: no AI code review, or one that runs only when someone asks
+for it; a review run in the session that wrote the code.
 
-**Each finding goes back to its cause.** Whatever its source (an audit, a code
-review, a human), a finding takes one of three paths, and only that loop runs
-again. A bug means a test was missing: a test that reproduces it comes first,
-reviewed like the others, then the fix. A quality issue changes the code and
-no test. A plan that was wrong or incomplete is an open point: decided, written
-into the plan, then the tests follow.
+**The review reads the tests, not only the code.** A test that checks
+nothing, or that is unnecessary, is counter-productive: it costs maintenance
+and makes a behaviour look protected when it is not. The review judges what
+each test protects, which behaviours, cases and boundaries have no test, and
+which tests assert nothing, duplicate another or pass whatever the code does.
+It reads; it does not run mutation testing, too heavy for a local machine. The
+`test-review` skill does this reading.
+*Missing when*: the review covers the code only; a test that asserts nothing
+passes review.
+
+**Each finding goes back to its cause.** Whatever its source (a review, a
+human), a finding takes one of three paths. A bug means a test was missing: a
+test that reproduces it comes first, then the fix. A quality issue changes the
+code and no test. A plan that was wrong or incomplete is an open point:
+decided, written into the plan, then the tests follow.
 *Missing when*: bugs fixed without a test that reproduces them; tests edited
 to fit a fix; a change of behaviour that reached the code but not the plan.
 
-**One role per agent.** Agents grade their own work too favourably. The agent
-that produces does not verify, and one that writes both the tests and the code
-adjusts one to the other.
+**One role per agent.** Agents grade their own work too favourably: the agent
+that produces does not verify.
 
-**Agents briefed for a need.** Investigation, test writing, test review,
-development: each with its own brief, launched when that need arises. Not one
-agent per language. This also lightens the base instructions: what only
-matters during an investigation stops loading into every session.
+**Agents briefed for a need.** Investigation, development, review: each with
+its own brief, launched when that need arises. Not one agent per language.
+This also lightens the base instructions: what only matters during an
+investigation stops loading into every session.
 
 **Define what counts as proof.** Left to the agent's interpretation, anything
 becomes proof. The harness states, per kind of work, what proves it is done.
