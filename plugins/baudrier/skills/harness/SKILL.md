@@ -27,7 +27,7 @@ a throwaway prototype needs little, a shared production codebase needs most.
 The mechanisms described are proposals; the principle is what matters, and the
 project picks the mechanism that fits it.
 
-Three rules apply to every recommendation:
+Four rules apply to every recommendation:
 
 - **Plug into the project.** Adapt to its conventions, tools and workflows
   (an existing planning workflow, an existing CI). Fill the gaps; never impose
@@ -38,6 +38,9 @@ Three rules apply to every recommendation:
 - **Frame a cooperative agent, do not fight an adversary.** An agent follows
   its instructions. A check that detects drift, plus a review, is enough to
   catch it. Closing every imaginable bypass costs more than it protects.
+- **Never break the flow.** A harness exists so the agent can work. One that
+  stops legitimate work has failed, however well it protects. Every block
+  names the risk it guards against, and fires on that risk only.
 
 A harness has two scopes: the machine (global instructions, credentials,
 global hooks) and the project (repository, CI, platform settings). Recommend
@@ -113,7 +116,10 @@ branch that is behind.
 **Prove each guard works.** A guard that never fires looks exactly like one
 that works: both stay green. Feed it a deliberate defect (an unprotected route
 for the route check, a forbidden action for a hook) and check that it fails.
-*Missing when*: a guard has no test of its own.
+Then feed it the legitimate work closest to that defect, and check that it
+lets it through.
+*Missing when*: a guard has no test of its own, or is tested only on what it
+must stop.
 
 ### What only an AI can judge
 
@@ -277,6 +283,14 @@ that stops being true, remove it.
 **Each guardrail informs or blocks.** Block when the mistake becomes costly to
 undo, inform while it is still cheap to fix. A harness that blocks everything
 gets bypassed.
+
+**A block targets the action, not what resembles it.** A guard matches the
+risky action itself (a write to the file, the setting that changes), never a
+proxy that legitimate work also produces (a file name in a command, a
+keyword). Each false positive halts routine work, and repeated ones teach
+everyone to bypass the guard.
+*Missing when*: a guard matches on a mention rather than on the action; a
+block that nobody can tie to a specific risk.
 
 **A block that must hold lives in CI.** Locally, any guard can be bypassed. In
 CI, the block holds until the problem is fixed.
